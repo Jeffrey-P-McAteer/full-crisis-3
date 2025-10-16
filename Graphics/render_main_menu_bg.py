@@ -90,11 +90,15 @@ def render_background():
     """Render the main menu background animation to MP4"""
     import os
     
+    # Get the directory containing this script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    build_dir = os.path.join(script_dir, "build")
+    
     # Ensure output directory exists
-    os.makedirs("Graphics/build", exist_ok=True)
+    os.makedirs(build_dir, exist_ok=True)
     
     # Configure manim to output MP4 at 30fps
-    config.media_dir = "Graphics/build"
+    config.media_dir = build_dir
     config.output_file = "main-menu-bg"
     config.format = "mp4"
     config.frame_rate = 30
@@ -103,7 +107,8 @@ def render_background():
     scene = MainMenuBackground()
     scene.render()
     
-    print(f"Background animation rendered to: Graphics/build/main-menu-bg.mp4")
+    output_path = os.path.join(build_dir, "main-menu-bg.mp4")
+    print(f"Background animation rendered to: {output_path}")
 
 if __name__ == "__main__":
     render_background()
