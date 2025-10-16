@@ -192,9 +192,9 @@ def create_pages_branch(temp_dir):
     if not run_command(["git", "init"], cwd=temp_path, description="Initializing temporary git repository"):
         return False
     
-    # Configure git (use existing config or defaults)
-    run_command(["git", "config", "user.name", "Release Publisher"], cwd=temp_path, description="Setting git user name")
-    run_command(["git", "config", "user.email", "noreply@github.com"], cwd=temp_path, description="Setting git user email")
+    # # Configure git (use existing config or defaults)
+    # run_command(["git", "config", "user.name", "Release Publisher"], cwd=temp_path, description="Setting git user name")
+    # run_command(["git", "config", "user.email", "noreply@github.com"], cwd=temp_path, description="Setting git user email")
     
     # Copy release files
     release_dir = Path("release")
