@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using FullCrisis3.Core.Input;
 using FullCrisis3.Core.Graphics;
+using FullCrisis3.Core.Assets;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -73,11 +74,11 @@ public class Menu
         }
     }
 
-    public void Draw(SpriteBatch spriteBatch, BitmapFont font)
+    public void Draw(SpriteBatch spriteBatch, BitmapFont font, AssetManager? assetManager = null)
     {
         foreach (var item in _items)
         {
-            item.Draw(spriteBatch, font);
+            item.Draw(spriteBatch, font, assetManager);
         }
     }
 

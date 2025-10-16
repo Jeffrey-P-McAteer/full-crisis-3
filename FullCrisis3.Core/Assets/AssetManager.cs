@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using FullCrisis3.Core.Graphics;
 using System.Collections.Generic;
@@ -15,6 +16,16 @@ public class AssetManager
         _graphicsDevice = graphicsDevice;
         _fonts = new Dictionary<string, BitmapFont>();
         _textures = new Dictionary<string, Texture2D>();
+        
+        // Create a 1x1 white pixel texture for UI drawing
+        CreatePixelTexture();
+    }
+    
+    private void CreatePixelTexture()
+    {
+        var pixel = new Texture2D(_graphicsDevice, 1, 1);
+        pixel.SetData(new[] { Color.White });
+        _textures["Pixel"] = pixel;
     }
 
     public void LoadFont(string name)

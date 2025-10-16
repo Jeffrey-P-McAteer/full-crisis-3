@@ -21,6 +21,12 @@ public class SceneManager
         _currentScene?.Unload();
         _currentScene = scene;
         _currentScene.Load(_inputManager, _assetManager);
+        
+        // If it's the main menu, provide a reference to this scene manager
+        if (_currentScene is MainMenuScene mainMenu)
+        {
+            mainMenu.SetSceneManager(this);
+        }
     }
 
     public void Update(GameTime gameTime)
