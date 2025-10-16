@@ -44,13 +44,13 @@ dotnet run
 ### Linux
 ```bash
 cd release
-./run_linux.sh
+./FullCrisis3.linux.x64
 ```
 
 ### Windows
 ```batch
 cd release
-run_windows.bat
+FullCrisis3.win.x64.exe
 ```
 
 ## Architecture

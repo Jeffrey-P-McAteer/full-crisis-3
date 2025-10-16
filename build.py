@@ -75,45 +75,6 @@ def build_desktop(platform, runtime_id, output_name, release_dir):
     return True
 
 
-def create_run_scripts(release_dir):
-    """Create convenience run scripts"""
-    print("\nCreating run scripts...")
-    
-    # Linux run script
-    linux_script = release_dir / "run_linux.sh"
-    with open(linux_script, 'w') as f:
-        f.write("""#!/bin/bash
-cd "$(dirname "$0")"
-chmod +x FullCrisis3.linux.x64
-echo "Starting Full Crisis 3 for Linux..."
-echo "Controls:"
-echo "  Arrow Keys / WASD: Navigate menu"
-echo "  Enter / Space: Select"
-echo "  Escape: Exit"
-echo "  Gamepad: D-Pad/Left Stick to navigate, A to select, B/Back to exit"
-echo ""
-./FullCrisis3.linux.x64
-""")
-    linux_script.chmod(0o755)
-    
-    # Windows run script
-    windows_script = release_dir / "run_windows.bat"
-    with open(windows_script, 'w') as f:
-        f.write("""@echo off
-cd /d "%~dp0"
-echo Starting Full Crisis 3 for Windows...
-echo Controls:
-echo   Arrow Keys / WASD: Navigate menu
-echo   Enter / Space: Select
-echo   Escape: Exit
-echo   Gamepad: D-Pad/Left Stick to navigate, A to select, B/Back to exit
-echo.
-FullCrisis3.win.x64.exe
-pause
-""")
-    
-    
-    print("SUCCESS: Run scripts created")
 
 def main():
     """Main build function"""
@@ -147,9 +108,6 @@ def main():
         release_dir
     )
     
-    
-    # Create run scripts
-    create_run_scripts(release_dir)
     
     # Print summary
     print("\n" + "=" * 50)
