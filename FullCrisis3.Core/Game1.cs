@@ -47,7 +47,8 @@ public class FullCrisisGame : Game
     {
         _inputManager.Update();
         
-        if (_inputManager.IsKeyPressed(Keys.Escape) || GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+        // Let scenes handle escape key navigation now
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
             Exit();
 
         _sceneManager.Update(gameTime);

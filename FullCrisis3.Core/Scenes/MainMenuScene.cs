@@ -20,6 +20,8 @@ public class MainMenuScene : IScene
     private Vector2 _screenCenter;
     private BackgroundAnimation _backgroundAnimation;
     private SceneManager? _sceneManager;
+    private ConfirmationDialog? _quitDialog;
+    private bool _showingQuitDialog;
 
     public MainMenuScene(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
@@ -59,6 +61,16 @@ public class MainMenuScene : IScene
         // Load background animation (placeholder for video)
         _backgroundAnimation.LoadVideo("MenuBackground");
         _backgroundAnimation.Play();
+
+        // Initialize quit dialog
+        _quitDialog = new ConfirmationDialog(
+            "Quit Full-Crisis?",
+            "Quit",
+            "Keep Playing",
+            () => Environment.Exit(0),
+            () => _showingQuitDialog = false
+        );
+        _quitDialog.Initialize(_graphicsDevice, _font);
     }
 
     public void Unload()
@@ -70,6 +82,20 @@ public class MainMenuScene : IScene
         if (_inputManager == null) return;
 
         _backgroundAnimation.Update(gameTime);
+
+        if (_showingQuitDialog)
+        {
+            _quitDialog?.Update(_inputManager);
+            return;
+        }
+
+        // Handle escape key to show quit dialog
+        if (_inputManager.IsCancel())
+        {
+            _showingQuitDialog = true;
+            return;
+        }
+
         _menu.Update(_inputManager);
 
         if (_menu.IsItemSelected(_inputManager))
@@ -87,7 +113,7 @@ public class MainMenuScene : IScene
                     NavigateToSubMenu("Settings");
                     break;
                 case "Quit":
-                    Environment.Exit(0);
+                    _showingQuitDialog = true;
                     break;
             }
         }
@@ -99,13 +125,13 @@ public class MainMenuScene : IScene
         
         IScene subScene = menuType switch
         {
-            "New Game" => new NewGameScene(_spriteBatch, _graphicsDevice, () => _sceneManager.SetScene(this)),
-            "Load Game" => new LoadGameScene(_spriteBatch, _graphicsDevice, () => _sceneManager.SetScene(this)),
-            "Settings" => new SettingsScene(_spriteBatch, _graphicsDevice, () => _sceneManager.SetScene(this)),
+            "New Game" => new NewGameScene(_spriteBatch, _graphicsDevice, () => _sceneManager.PopScene()),
+            "Load Game" => new LoadGameScene(_spriteBatch, _graphicsDevice, () => _sceneManager.PopScene()),
+            "Settings" => new SettingsScene(_spriteBatch, _graphicsDevice, () => _sceneManager.PopScene()),
             _ => this
         };
         
-        _sceneManager.SetScene(subScene);
+        _sceneManager.PushScene(subScene);
     }
 
     public void Draw(GameTime gameTime)
@@ -124,6 +150,12 @@ public class MainMenuScene : IScene
 
         // Draw menu with outlines
         _menu.Draw(_spriteBatch, _font, _assetManager);
+
+        // Draw quit dialog if showing
+        if (_showingQuitDialog)
+        {
+            _quitDialog?.Draw(_spriteBatch, _font, _assetManager);
+        }
 
         _spriteBatch.End();
     }
