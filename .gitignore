@@ -5,3 +5,6 @@ build
 target
 __pycache__
 
+# Third-party assets (can be re-downloaded via download-assets.py)
+thirdparty/
+
