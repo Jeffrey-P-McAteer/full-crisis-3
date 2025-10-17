@@ -1,14 +1,17 @@
-using FullCrisis3.Core;
+using Avalonia;
 using System;
 
 namespace FullCrisis3.Desktop;
 
-public static class Program
+public sealed class Program
 {
     [STAThread]
-    static void Main()
-    {
-        using var game = new FullCrisisGame();
-        game.Run();
-    }
+    public static void Main(string[] args) => BuildAvaloniaApp()
+        .StartWithClassicDesktopLifetime(args);
+
+    public static AppBuilder BuildAvaloniaApp()
+        => AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .WithInterFont()
+            .LogToTrace();
 }

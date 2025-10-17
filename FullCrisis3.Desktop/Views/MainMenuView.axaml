@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FullCrisis3.Core.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
+             x:Class="FullCrisis3.Desktop.Views.MainMenuView"
+             x:DataType="vm:MainMenuViewModel">
+
+  <Design.DataContext>
+    <vm:MainMenuViewModel />
+  </Design.DataContext>
+
+  <Grid RowDefinitions="*,Auto,*">
+    <!-- Title -->
+    <TextBlock Grid.Row="0" 
+               Text="Full Crisis 3" 
+               Classes="Title"
+               VerticalAlignment="Center" />
+    
+    <!-- Menu Buttons -->
+    <StackPanel Grid.Row="1" 
+                Orientation="Vertical" 
+                HorizontalAlignment="Center" 
+                Spacing="15">
+      
+      <Button Content="New Game" 
+              Classes="MenuButton" 
+              Command="{Binding NewGameCommand}" />
+      
+      <Button Content="Load Game" 
+              Classes="MenuButton" 
+              Command="{Binding LoadGameCommand}" />
+      
+      <Button Content="Settings" 
+              Classes="MenuButton" 
+              Command="{Binding SettingsCommand}" />
+      
+      <Button Content="Quit" 
+              Classes="MenuButton" 
+              Command="{Binding QuitCommand}" />
+    </StackPanel>
+    
+    <!-- Footer space -->
+    <Grid Grid.Row="2" />
+  </Grid>
+</UserControl>

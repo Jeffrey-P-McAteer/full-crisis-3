@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FullCrisis3.Core.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
+        x:Class="FullCrisis3.Desktop.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Full Crisis 3"
+        Width="1280" Height="720"
+        WindowStartupLocation="CenterScreen"
+        Background="Black">
+
+  <Design.DataContext>
+    <vm:MainWindowViewModel />
+  </Design.DataContext>
+
+  <!-- Background with animated gradient -->
+  <Panel>
+    <Rectangle Fill="Black" />
+    
+    <!-- Animated background pattern -->
+    <Rectangle>
+      <Rectangle.Fill>
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#FF001122" Offset="0.0" />
+          <GradientStop Color="#FF000033" Offset="0.5" />
+          <GradientStop Color="#FF110022" Offset="1.0" />
+        </LinearGradientBrush>
+      </Rectangle.Fill>
+    </Rectangle>
+    
+    <!-- Content -->
+    <ContentControl Content="{Binding CurrentView}" />
+    
+    <!-- Quit Confirmation Dialog -->
+    <Border Classes="DialogOverlay" IsVisible="{Binding IsQuitDialogVisible}">
+      <Border Classes="DialogBox" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="20">
+          <TextBlock Text="Quit Full-Crisis?" 
+                     Classes="MenuText" 
+                     FontSize="20" 
+                     HorizontalAlignment="Center" />
+          
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+            <Button Content="Quit" 
+                    Classes="DialogButton" 
+                    Background="DarkRed" 
+                    Command="{Binding ConfirmQuitCommand}" />
+            <Button Content="Keep Playing" 
+                    Classes="DialogButton" 
+                    Background="DarkGreen" 
+                    Command="{Binding CancelQuitCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+  </Panel>
+</Window>

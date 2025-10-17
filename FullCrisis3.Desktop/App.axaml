@@ -1,0 +1,72 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="FullCrisis3.Desktop.App"
+             Name="FullCrisis3Desktop"
+             RequestedThemeVariant="Dark">
+
+  <Application.Styles>
+    <FluentTheme />
+    
+    <!-- Custom Fonts -->
+    <Style Selector="TextBlock.Title">
+      <Setter Property="FontFamily" Value="Times New Roman" />
+      <Setter Property="FontSize" Value="36" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="Effect">
+        <DropShadowEffect Color="Black" OffsetX="3" OffsetY="3" BlurRadius="5" />
+      </Setter>
+    </Style>
+    
+    <Style Selector="Button.MenuButton">
+      <Setter Property="FontFamily" Value="Courier New" />
+      <Setter Property="FontSize" Value="18" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="White" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="Padding" Value="20,10" />
+      <Setter Property="Margin" Value="0,5" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="MinWidth" Value="200" />
+    </Style>
+    
+    <Style Selector="Button.MenuButton:pointerover">
+      <Setter Property="Background" Value="#404040" />
+      <Setter Property="BorderBrush" Value="Yellow" />
+      <Setter Property="Foreground" Value="Yellow" />
+    </Style>
+    
+    <Style Selector="Button.MenuButton:pressed">
+      <Setter Property="Background" Value="#606060" />
+    </Style>
+    
+    <Style Selector="TextBlock.MenuText">
+      <Setter Property="FontFamily" Value="Courier New" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <!-- Dialog Styles -->
+    <Style Selector="Border.DialogOverlay">
+      <Setter Property="Background" Value="#80000000" />
+    </Style>
+    
+    <Style Selector="Border.DialogBox">
+      <Setter Property="Background" Value="#2F2F2F" />
+      <Setter Property="BorderBrush" Value="White" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="30" />
+    </Style>
+    
+    <Style Selector="Button.DialogButton">
+      <Setter Property="FontFamily" Value="Courier New" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="Padding" Value="15,8" />
+      <Setter Property="Margin" Value="10,0" />
+      <Setter Property="MinWidth" Value="100" />
+    </Style>
+  </Application.Styles>
+</Application>

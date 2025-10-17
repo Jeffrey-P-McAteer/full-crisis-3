@@ -1,15 +1,16 @@
 # Full Crisis 3
 
-A cross-platform 2D videogame built with .NET 9 and MonoGame, supporting Linux x86_64 and Windows x86_64 platforms.
+A cross-platform desktop application built with .NET 9 and Avalonia UI, supporting Linux x86_64 and Windows x86_64 platforms.
 
 ## Features
 
-- **Cross-Platform Desktop**: Runs natively on Linux and Windows
-- **Self-Contained**: Desktop executables require no external files or installation
-- **Multi-Input Support**: Mouse, keyboard (Arrow keys/WASD), and game controller navigation
-- **Main Menu**: New Game, Load Game, Settings, and Quit options
-- **Responsive UI**: Scales and adapts to different screen sizes
-- **Built-in Font**: Custom bitmap font system eliminates external dependencies
+- **Cross-Platform Desktop**: Runs natively on Linux and Windows using Avalonia UI
+- **Self-Contained**: Desktop executables include all necessary dependencies
+- **Modern UI**: Built with XAML and MVVM architecture using Avalonia
+- **Main Menu**: New Game, Load Game, Settings, and Quit options with smooth navigation
+- **Responsive UI**: Scales and adapts to different screen sizes and DPI settings
+- **Dark Theme**: Modern dark theme with custom fonts and styling
+- **Quit Confirmation**: Modal dialog with escape key navigation support
 
 ## Building
 
@@ -27,8 +28,8 @@ python3 build.py
 ```
 
 This creates:
-- `./release/FullCrisis3.linux.x64` - Self-contained Linux executable
-- `./release/FullCrisis3.win.x64.exe` - Self-contained Windows executable
+- `./release/FullCrisis3.linux/` - Self-contained Linux application directory
+- `./release/FullCrisis3.windows/` - Self-contained Windows application directory
 
 ### Manual Build
 
@@ -43,14 +44,14 @@ dotnet run
 
 ### Linux
 ```bash
-cd release
-./FullCrisis3.linux.x64
+cd release/FullCrisis3.linux
+./FullCrisis3.Desktop
 ```
 
 ### Windows
 ```batch
-cd release
-FullCrisis3.win.x64.exe
+cd release\FullCrisis3.windows
+FullCrisis3.Desktop.exe
 ```
 
 ## Architecture
@@ -64,25 +65,26 @@ FullCrisis3/
 
 ### Key Components
 
-- **FullCrisisGame**: Main game class with MonoGame lifecycle
-- **SceneManager**: Manages different game states (menu, gameplay, etc.)
-- **InputManager**: Unified input handling for keyboard, mouse, and gamepad
-- **AssetManager**: Asset loading and management
-- **UI System**: Accessible menu system with visual feedback
+- **MainWindow**: Main application window built with Avalonia
+- **MainWindowViewModel**: Root view model managing navigation and dialogs
+- **MainMenuView**: XAML-based main menu with styled buttons
+- **SubMenuView**: Reusable XAML template for sub-menus
+- **MVVM Architecture**: Clean separation using ReactiveUI for data binding
 
 ## Controls
 
-- **Navigation**: Arrow Keys, WASD, Mouse, or Gamepad D-Pad/Left Stick
-- **Select**: Enter, Space, Mouse Click, or Gamepad A button  
-- **Back/Cancel**: Escape or Gamepad B button
-- **Quit**: Escape (from main menu)
+- **Navigation**: Mouse click, Tab/Shift+Tab for keyboard navigation
+- **Select**: Mouse click, Enter, or Space
+- **Back/Cancel**: Escape key
+- **Quit**: Escape (from main menu shows confirmation dialog)
 
 ## Development
 
-The game uses a modular architecture that separates:
-- Core game logic (shared across platforms)
-- Platform-specific implementations (desktop only)
-- Asset management optimized for desktop performance
-- Scene-based state management for easy extension
+The application uses a modern MVVM architecture with:
+- **Views**: XAML-based UI definitions with styling and layout
+- **ViewModels**: Business logic and data binding using ReactiveUI
+- **Models**: Data structures and core application logic
+- **Platform-specific**: Desktop implementations for Linux and Windows
+- **Cross-platform**: Avalonia provides consistent UI across platforms
 
-Ready for adding gameplay features, animations, and additional game assets!
+Ready for adding game features, animations, and additional UI screens!
