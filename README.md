@@ -64,7 +64,7 @@ FullCrisis3/
 
 ### Key Components
 
-- **Game1**: Main game class with MonoGame lifecycle
+- **FullCrisisGame**: Main game class with MonoGame lifecycle
 - **SceneManager**: Manages different game states (menu, gameplay, etc.)
 - **InputManager**: Unified input handling for keyboard, mouse, and gamepad
 - **AssetManager**: Asset loading and management

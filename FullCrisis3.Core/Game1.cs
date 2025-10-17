@@ -7,7 +7,7 @@ using FullCrisis3.Core.Assets;
 
 namespace FullCrisis3.Core;
 
-public class Game1 : Game
+public class FullCrisisGame : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch = null!;
@@ -15,7 +15,7 @@ public class Game1 : Game
     private InputManager _inputManager = null!;
     private AssetManager _assetManager = null!;
 
-    public Game1()
+    public FullCrisisGame()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
