@@ -101,14 +101,6 @@ def run_game(exe_path, game_args):
     # Prepare command with game arguments
     cmd = [str(exe_path)] + game_args
     
-    print("Starting Full Crisis 3 (Debug)")
-    print("Controls:")
-    print("  Arrow Keys / WASD: Navigate menu")
-    print("  Enter / Space: Select")
-    print("  Escape: Exit")
-    print("  Gamepad: D-Pad/Left Stick to navigate, A to select, B/Back to exit")
-    print()
-    
     # Run the game with stdout connected to terminal
     run_command(cmd, description=f"Running debug executable with args: {game_args}")
 
