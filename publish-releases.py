@@ -3,6 +3,10 @@
 # requires-python = ">=3.11"
 # dependencies = [
 #    "GitPython",
+#    "matplotlib>=3.7.0",
+#    "pandas>=2.0.0",
+#    "seaborn>=0.12.0",
+#    "numpy>=1.24.0"
 # ]
 # ///
 """
@@ -18,6 +22,7 @@ import tempfile
 from pathlib import Path
 import webbrowser
 import datetime
+import base64
 
 # third-party dependencies
 import git
@@ -124,6 +129,28 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
             margin: 5px 0;
             color: #555;
         }
+        .project-status {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        .project-status h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .chart-container {
+            margin: 20px 0;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
         .footer {
             margin-top: 30px;
             padding-top: 20px;
@@ -162,6 +189,13 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
             </ul>
         </div>
         
+        <div class="project-status">
+            <h3>Project Status</h3>
+            <div class="chart-container">
+                <img src="data:image/png;base64,{CHART_DATA}" alt="Lines of Code Over Time" />
+            </div>
+        </div>
+        
         <div class="footer">
             <p>Built at """+BUILD_TIMESTAMP+""" from """+GIT_HASH_AND_DELTAS+"""</p>
         </div>
@@ -187,6 +221,31 @@ def run_command(cmd, cwd=None, description="", capture_output=True):
             if e.stderr:
                 print(f"Stderr: {e.stderr}")
         return False
+
+def generate_project_stats_chart():
+    """Generate project statistics chart and return base64 encoded image"""
+    print("Generating project statistics chart...")
+    
+    with tempfile.TemporaryDirectory() as stats_temp_dir:
+        # Run project-stats.py script to generate charts
+        if not run_command([
+            "uv", "run", "project-stats.py", stats_temp_dir
+        ], description="Generating project statistics"):
+            print("WARNING: Failed to generate project statistics chart")
+            return None
+        
+        # Read the generated chart file
+        chart_file = Path(stats_temp_dir) / "lines_of_code_over_time.png"
+        if not chart_file.exists():
+            print("WARNING: Chart file not found after generation")
+            return None
+        
+        # Convert to base64
+        with open(chart_file, 'rb') as f:
+            chart_data = base64.b64encode(f.read()).decode('utf-8')
+        
+        print("SUCCESS: Project statistics chart generated and encoded")
+        return chart_data
 
 def check_release_files():
     """Check if required release files exist"""
@@ -232,10 +291,26 @@ def create_pages_branch(temp_dir):
     shutil.copy2(linux_exe, temp_path / "FullCrisis3.linux.x64")
     shutil.copy2(windows_exe, temp_path / "FullCrisis3.win.x64.exe")
     
-    # Create index.html
+    # Generate project statistics chart
+    chart_data = generate_project_stats_chart()
+    
+    # Create index.html with embedded chart
     index_file = temp_path / "index.html"
     with open(index_file, 'w', encoding='utf-8') as f:
-        f.write(INDEX_HTML_TEMPLATE)
+        html_content = INDEX_HTML_TEMPLATE
+        if chart_data:
+            html_content = html_content.replace("{CHART_DATA}", chart_data)
+        else:
+            # If chart generation failed, remove the chart section
+            html_content = html_content.replace(
+                '''        <div class="project-status">
+            <h3>Project Status</h3>
+            <div class="chart-container">
+                <img src="data:image/png;base64,{CHART_DATA}" alt="Lines of Code Over Time" />
+            </div>
+        </div>
+        ''', '')
+        f.write(html_content)
     
     print("SUCCESS: Files copied to temporary directory")
 
