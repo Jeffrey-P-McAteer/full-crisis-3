@@ -9,7 +9,7 @@ A cross-platform desktop application built with .NET 9 and Avalonia UI, supporti
 - **Modern UI**: Built with XAML and MVVM architecture using Avalonia
 - **Main Menu**: New Game, Load Game, Settings, and Quit options with smooth navigation
 - **Responsive UI**: Scales and adapts to different screen sizes and DPI settings
-- **Dark Theme**: Modern dark theme with custom fonts and styling
+- **Dark Theme**: Modern dark theme with cross-platform fonts and styling
 - **Quit Confirmation**: Modal dialog with escape key navigation support
 
 ## Building
@@ -86,5 +86,14 @@ The application uses a modern MVVM architecture with:
 - **Models**: Data structures and core application logic
 - **Platform-specific**: Desktop implementations for Linux and Windows
 - **Cross-platform**: Avalonia provides consistent UI across platforms
+- **Font Support**: Cross-platform font fallbacks (Times/Liberation Serif for titles, Courier/Liberation Mono for UI)
 
 Ready for adding game features, animations, and additional UI screens!
+
+## Font Configuration
+
+The application uses cross-platform font stacks for maximum compatibility:
+- **Title Font**: `Times New Roman,Liberation Serif,Times,serif`
+- **UI/Button Font**: `Courier New,Liberation Mono,DejaVu Sans Mono,Consolas,monospace`
+
+This ensures the application looks consistent across Windows, Linux, and macOS without requiring custom font embedding.

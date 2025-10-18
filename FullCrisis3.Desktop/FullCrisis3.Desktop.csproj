@@ -26,9 +26,5 @@
     <ProjectReference Include="..\FullCrisis3.Core\FullCrisis3.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="../thirdparty/fonts/Rockwell.ttf" />
-    <EmbeddedResource Include="../thirdparty/fonts/Letter-Gothic.ttf" />
-  </ItemGroup>
 
 </Project>

@@ -7,9 +7,9 @@
   <Application.Styles>
     <FluentTheme />
     
-    <!-- Custom Fonts -->
+    <!-- Cross-Platform Fonts with Fallbacks -->
     <Style Selector="TextBlock.Title">
-      <Setter Property="FontFamily" Value="avares://FullCrisis3.Desktop/../thirdparty/fonts/Rockwell.ttf#Rockwell" />
+      <Setter Property="FontFamily" Value="Times New Roman,Liberation Serif,Times,serif" />
       <Setter Property="FontSize" Value="48" />
       <Setter Property="FontWeight" Value="Bold" />
       <Setter Property="Foreground" Value="White" />
@@ -20,7 +20,7 @@
     </Style>
     
     <Style Selector="Button.MenuButton">
-      <Setter Property="FontFamily" Value="avares://FullCrisis3.Desktop/../thirdparty/fonts/Letter-Gothic.ttf#Letter Gothic" />
+      <Setter Property="FontFamily" Value="Courier New,Liberation Mono,DejaVu Sans Mono,Consolas,monospace" />
       <Setter Property="FontSize" Value="20" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderBrush" Value="White" />
@@ -43,7 +43,7 @@
     </Style>
     
     <Style Selector="TextBlock.MenuText">
-      <Setter Property="FontFamily" Value="avares://FullCrisis3.Desktop/../thirdparty/fonts/Letter-Gothic.ttf#Letter Gothic" />
+      <Setter Property="FontFamily" Value="Courier New,Liberation Mono,DejaVu Sans Mono,Consolas,monospace" />
       <Setter Property="FontSize" Value="16" />
       <Setter Property="Foreground" Value="White" />
     </Style>
@@ -62,7 +62,7 @@
     </Style>
     
     <Style Selector="Button.DialogButton">
-      <Setter Property="FontFamily" Value="avares://FullCrisis3.Desktop/../thirdparty/fonts/Letter-Gothic.ttf#Letter Gothic" />
+      <Setter Property="FontFamily" Value="Courier New,Liberation Mono,DejaVu Sans Mono,Consolas,monospace" />
       <Setter Property="FontSize" Value="18" />
       <Setter Property="Padding" Value="15,8" />
       <Setter Property="Margin" Value="10,0" />
