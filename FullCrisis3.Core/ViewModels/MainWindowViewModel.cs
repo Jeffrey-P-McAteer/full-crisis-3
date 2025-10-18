@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
+using FullCrisis3.Core.Input;
 
 namespace FullCrisis3.Core.ViewModels;
 
@@ -11,9 +12,14 @@ public class MainWindowViewModel : ViewModelBase
     private readonly Stack<ViewModelBase> _viewStack = new();
     private ViewModelBase? _currentView;
     private bool _isQuitDialogVisible;
+    private readonly GamepadInputService _gamepadInput;
 
     public MainWindowViewModel()
     {
+        // Initialize gamepad input
+        _gamepadInput = new GamepadInputService();
+        _gamepadInput.InputObservable.Subscribe(HandleGamepadInput);
+
         // Initialize with main menu
         var mainMenuViewModel = new MainMenuViewModel();
         mainMenuViewModel.NavigateToSubMenu = NavigateToSubMenu;
@@ -97,5 +103,27 @@ public class MainWindowViewModel : ViewModelBase
     private void CancelQuit()
     {
         IsQuitDialogVisible = false;
+    }
+
+    private void HandleGamepadInput(GamepadInput input)
+    {
+        switch (input)
+        {
+            case GamepadInput.Cancel:
+                HandleEscapeKey();
+                break;
+            case GamepadInput.Confirm:
+                // Handle confirm action based on current view
+                if (IsQuitDialogVisible)
+                {
+                    ConfirmQuit();
+                }
+                else if (CurrentView is MainMenuViewModel mainMenu)
+                {
+                    // Simulate clicking the first menu item for now
+                    mainMenu.NewGameCommand.Execute().Subscribe();
+                }
+                break;
+        }
     }
 }

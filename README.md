@@ -28,8 +28,8 @@ python3 build.py
 ```
 
 This creates:
-- `./release/FullCrisis3.linux/` - Self-contained Linux application directory
-- `./release/FullCrisis3.windows/` - Self-contained Windows application directory
+- `./release/FullCrisis3.linux.x64` - Self-contained Linux executable
+- `./release/FullCrisis3.win.x64.exe` - Self-contained Windows executable
 
 ### Manual Build
 
@@ -44,14 +44,14 @@ dotnet run
 
 ### Linux
 ```bash
-cd release/FullCrisis3.linux
-./FullCrisis3.Desktop
+cd release
+./FullCrisis3.linux.x64
 ```
 
 ### Windows
 ```batch
-cd release\FullCrisis3.windows
-FullCrisis3.Desktop.exe
+cd release
+FullCrisis3.win.x64.exe
 ```
 
 ## Architecture

@@ -37,7 +37,7 @@ def clean_release_dir():
     release_dir.mkdir(exist_ok=True)
     return release_dir
 
-def build_desktop(platform, runtime_id, release_dir):
+def build_desktop(platform, runtime_id, output_name, release_dir):
     """Build desktop version for specified platform"""
     print(f"\nBuilding {platform} version...")
     
@@ -50,21 +50,26 @@ def build_desktop(platform, runtime_id, release_dir):
         "-c", "Release",
         "-r", runtime_id,
         "--self-contained", "true",
-        "-p:PublishSingleFile=false",
+        "-p:PublishSingleFile=true",
         "-p:PublishTrimmed=false",
+        "-p:IncludeNativeLibrariesForSelfExtract=true",
         "-o", str(output_dir.absolute())
     ]
     
     if not run_command(cmd, cwd=desktop_dir, description=f"Building {platform} executable"):
         return False
     
-    # Copy the entire output directory to final location
-    target_dir = release_dir / f"FullCrisis3.{platform.lower()}"
-    if target_dir.exists():
-        shutil.rmtree(target_dir)
+    # Find the executable and copy to final location
+    exe_extension = ".exe" if platform == "Windows" else ""
+    source_exe = output_dir / f"FullCrisis3.Desktop{exe_extension}"
+    target_exe = release_dir / output_name
     
-    shutil.copytree(output_dir, target_dir)
-    print(f"SUCCESS: {platform} build complete: {target_dir}")
+    if source_exe.exists():
+        shutil.copy2(source_exe, target_exe)
+        print(f"SUCCESS: {platform} build complete: {target_exe}")
+    else:
+        print(f"ERROR: Executable not found: {source_exe}")
+        return False
     
     # Clean up temp directory
     shutil.rmtree(output_dir)
@@ -92,6 +97,7 @@ def main():
     results['Linux'] = build_desktop(
         "Linux", 
         "linux-x64", 
+        "FullCrisis3.linux.x64",
         release_dir
     )
     
@@ -99,6 +105,7 @@ def main():
     results['Windows'] = build_desktop(
         "Windows", 
         "win-x64", 
+        "FullCrisis3.win.x64.exe",
         release_dir
     )
     
