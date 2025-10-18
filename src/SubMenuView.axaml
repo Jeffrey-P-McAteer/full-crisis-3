@@ -12,7 +12,7 @@
                  VerticalAlignment="Center" HorizontalAlignment="Center" />
     </Border>
     
-    <Button Grid.Row="2" Grid.Column="0" Content="Back" Classes="MenuButton" 
+    <Button Grid.Row="2" Grid.Column="0" Content="Back" Classes="CustomButton BackButton" 
             HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="50,20,0,50" 
             Command="{Binding BackCommand}" />
   </Grid>
