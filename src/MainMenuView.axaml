@@ -8,10 +8,10 @@
     <TextBlock Grid.Row="0" Text="Full Crisis 3" Classes="Title" VerticalAlignment="Center" />
     
     <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" Spacing="15">
-      <Button Name="NewGameButton" Content="New Game" Classes="MenuButton" Command="{Binding NewGameCommand}" IsDefault="True" />
-      <Button Name="LoadGameButton" Content="Load Game" Classes="MenuButton" Command="{Binding LoadGameCommand}" />
-      <Button Name="SettingsButton" Content="Settings" Classes="MenuButton" Command="{Binding SettingsCommand}" />
-      <Button Name="QuitButton" Content="Quit" Classes="MenuButton" Command="{Binding QuitCommand}" />
+      <Button Name="NewGameButton" Content="New Game" Classes="CustomButton MenuButton" Command="{Binding NewGameCommand}" IsDefault="True" />
+      <Button Name="LoadGameButton" Content="Load Game" Classes="CustomButton MenuButton" Command="{Binding LoadGameCommand}" />
+      <Button Name="SettingsButton" Content="Settings" Classes="CustomButton MenuButton" Command="{Binding SettingsCommand}" />
+      <Button Name="QuitButton" Content="Quit" Classes="CustomButton MenuButton" Command="{Binding QuitCommand}" />
     </StackPanel>
   </Grid>
 </UserControl>

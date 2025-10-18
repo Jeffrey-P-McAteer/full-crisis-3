@@ -30,53 +30,50 @@
       <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
     
-    <Style Selector="Button.MenuButton">
+    <!-- Base CustomButton style for all app buttons -->
+    <Style Selector="Button.CustomButton">
       <Setter Property="FontFamily" Value="{StaticResource LetterGothicFont}" />
+      <Setter Property="BorderBrush" Value="White" />
+      <Setter Property="BorderThickness" Value="3" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    
+    <!-- CustomButton focus behavior -->
+    <Style Selector="Button.CustomButton:focus">
+      <Setter Property="BorderBrush" Value="Yellow" />
+    </Style>
+    
+    <!-- Override default FluentTheme hover styles to preserve button background -->
+    <Style Selector="Button.CustomButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+      <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    </Style>
+    
+    <!-- Override default FluentTheme pressed styles to preserve button background -->
+    <Style Selector="Button.CustomButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+      <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    </Style>
+    
+    <!-- Main menu specific button styling -->
+    <Style Selector="Button.MenuButton">
       <Setter Property="FontSize" Value="20" />
       <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderBrush" Value="White" />
-      <Setter Property="BorderThickness" Value="2" />
-      <Setter Property="Foreground" Value="White" />
       <Setter Property="Padding" Value="20,10" />
       <Setter Property="Margin" Value="0,8" />
       <Setter Property="HorizontalAlignment" Value="Center" />
       <Setter Property="MinWidth" Value="200" />
     </Style>
     
-    <Style Selector="TextBlock">
-      <Setter Property="FontFamily" Value="{StaticResource LetterGothicFont}" />
-    </Style>
-    
-    <Style Selector="Button.MenuButton:focus">
-      <Setter Property="Background" Value="#404040" />
-      <Setter Property="BorderBrush" Value="Yellow" />
-      <Setter Property="Foreground" Value="Yellow" />
-    </Style>
-    
+    <!-- Quit dialog specific button styling -->
     <Style Selector="Button.QuitDialogButton">
-      <Setter Property="FontFamily" Value="{StaticResource LetterGothicFont}" />
       <Setter Property="FontSize" Value="16" />
-      <Setter Property="BorderBrush" Value="White" />
-      <Setter Property="BorderThickness" Value="3" />
-      <Setter Property="Foreground" Value="White" />
       <Setter Property="Padding" Value="15,8" />
       <Setter Property="MinWidth" Value="120" />
     </Style>
     
-    <Style Selector="Button.QuitDialogButton:focus">
-      <Setter Property="BorderBrush" Value="Yellow" />
-    </Style>
-    
-    <!-- Override default FluentTheme hover styles to preserve button background -->
-    <Style Selector="Button.QuitDialogButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
-      <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
-    </Style>
-    
-    <!-- Override default FluentTheme pressed styles to preserve button background -->
-    <Style Selector="Button.QuitDialogButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
-      <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    <Style Selector="TextBlock">
+      <Setter Property="FontFamily" Value="{StaticResource LetterGothicFont}" />
     </Style>
   </Application.Styles>
 </Application>
