@@ -18,6 +18,7 @@ public class MainMenuViewModel : ViewModelBase
 
     public Action<string>? NavigateToSubMenu { get; set; }
     public Action? ShowQuitDialog { get; set; }
+    public Action? RestoreFocusToQuit { get; set; }
 
     public MainMenuViewModel()
     {

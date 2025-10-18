@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.LogicalTree;
 using System;
 using System.Reactive;
 
@@ -22,9 +23,16 @@ public partial class MainWindow : Window
         // Watch for quit dialog visibility changes to set initial focus
         viewModel.PropertyChanged += (s, e) => 
         {
-            if (e.PropertyName == nameof(MainWindowViewModel.IsQuitDialogVisible) && viewModel.IsQuitDialogVisible)
+            if (e.PropertyName == nameof(MainWindowViewModel.IsQuitDialogVisible))
             {
-                SetInitialQuitDialogFocus();
+                if (viewModel.IsQuitDialogVisible)
+                {
+                    SetInitialQuitDialogFocus();
+                }
+                else
+                {
+                    RestoreFocusAfterQuitDialog();
+                }
             }
         };
     }
@@ -100,6 +108,23 @@ public partial class MainWindow : Window
         }
     }
 
+    private void RestoreFocusAfterQuitDialog()
+    {
+        // Try to focus the quit button in the main menu after a short delay
+        // This allows the UI to update and the MainMenuView to be available
+        if (DataContext is MainWindowViewModel vm && vm.CurrentView is MainMenuViewModel mainMenuVM)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                // Set focus back to quit button using the callback we added to MainMenuViewModel
+                if (mainMenuVM.RestoreFocusToQuit != null)
+                {
+                    mainMenuVM.RestoreFocusToQuit.Invoke();
+                }
+            }, Avalonia.Threading.DispatcherPriority.Background);
+        }
+    }
+
     private void HandleGamepadQuitDialogNavigation(string input)
     {
         if (_quitDialogButtons.Length == 0) return;
@@ -132,6 +157,15 @@ public partial class MainMenuView : UserControl
         InitializeComponent();
         Loaded += (s, e) => SetupButtons();
         KeyDown += OnKeyDown;
+        
+        // Wire up the focus restoration callback
+        DataContextChanged += (s, e) =>
+        {
+            if (DataContext is MainMenuViewModel vm)
+            {
+                vm.RestoreFocusToQuit = FocusQuitButton;
+            }
+        };
     }
 
     private void SetupButtons()
@@ -173,6 +207,15 @@ public partial class MainMenuView : UserControl
                 _buttons[_selectedIndex].Command?.Execute(null);
                 e.Handled = true;
                 break;
+        }
+    }
+
+    public void FocusQuitButton()
+    {
+        if (_buttons.Length > 3) // Quit button is at index 3
+        {
+            _selectedIndex = 3;
+            _buttons[_selectedIndex].Focus();
         }
     }
 }
