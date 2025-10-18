@@ -1,4 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#    "GitPython",
+# ]
+# ///
 """
 Full Crisis 3 Release Publisher
 Publishes release files to the 'pages' branch for GitHub Pages distribution
@@ -11,6 +17,28 @@ import sys
 import tempfile
 from pathlib import Path
 import webbrowser
+import datetime
+
+# thirdparty
+import git
+
+BUILD_TIMESTAMP = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
+r = git.Repo('.')
+h = r.head.commit.hexsha[:7]
+dirty = r.is_dirty()
+if dirty:
+    added,deleted = 0,0
+    for diff in r.index.diff(None):
+        for (a,b) in [(diff.a_blob, diff.b_blob)]:
+            pass
+    # simplified: call git directly for numstat
+    out = subprocess.getoutput('git diff --numstat')
+    added = sum(int(l.split()[0]) for l in out.splitlines() if l.split()[0].isdigit())
+    deleted = sum(int(l.split()[1]) for l in out.splitlines() if l.split()[1].isdigit())
+    GIT_HASH_AND_DELTAS = f"{h}-dirty+{added}-{deleted}"
+else:
+    GIT_HASH_AND_DELTAS = h
 
 # HTML template for the release download page
 INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
@@ -116,13 +144,11 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
             <a href="FullCrisis3.linux.x64" class="download-button" download>
                 <span class="platform-icon">🐧</span>
                 Linux x64
-                <div class="file-info">Self-contained executable</div>
             </a>
             
             <a href="FullCrisis3.win.x64.exe" class="download-button" download>
                 <span class="platform-icon">🪟</span>
                 Windows x64
-                <div class="file-info">Self-contained executable</div>
             </a>
         </div>
         
@@ -137,7 +163,7 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
         </div>
         
         <div class="footer">
-            <p>Built with .NET 9 and MonoGame Framework</p>
+            <p>Built at """+BUILD_TIMESTAMP+""" from """+GIT_HASH_AND_DELTAS+"""</p>
         </div>
     </div>
 </body>
