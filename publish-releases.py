@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+import webbrowser
 
 # HTML template for the release download page
 INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
@@ -211,6 +212,13 @@ def create_pages_branch(temp_dir):
         f.write(INDEX_HTML_TEMPLATE)
     
     print("SUCCESS: Files copied to temporary directory")
+
+    if 'preview' in sys.argv:
+        webbrowser.open(f'file:///{str(index_file)}')
+        input(f'Pausing to allow user to inspect page at {index_file}')
+        input('Press enter to continue...')
+    else:
+        print('Pushing directly to remote because "preview" not passed as an argument')
     
     # Add and commit files
     if not run_command(["git", "add", "."], cwd=temp_path, description="Adding files to git"):
