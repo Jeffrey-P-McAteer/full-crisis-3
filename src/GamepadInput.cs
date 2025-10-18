@@ -12,6 +12,7 @@ public class GamepadInput : IDisposable
 
     public GamepadInput(Action<string> onInput)
     {
+        Logger.LogMethod();
         _onInput = onInput;
         _previousState = GamePad.GetState(Microsoft.Xna.Framework.PlayerIndex.One);
         _timer = new Timer(Poll, null, 0, 16);
@@ -24,10 +25,10 @@ public class GamepadInput : IDisposable
             var currentState = GamePad.GetState(Microsoft.Xna.Framework.PlayerIndex.One);
             if (!currentState.IsConnected) return;
 
-            if (IsPressed(Buttons.A)) _onInput("Confirm");
-            if (IsPressed(Buttons.B)) _onInput("Cancel");
-            if (IsPressed(Buttons.DPadUp)) _onInput("Up");
-            if (IsPressed(Buttons.DPadDown)) _onInput("Down");
+            if (IsPressed(Buttons.A)) { Logger.Debug("Gamepad A pressed"); _onInput("Confirm"); }
+            if (IsPressed(Buttons.B)) { Logger.Debug("Gamepad B pressed"); _onInput("Cancel"); }
+            if (IsPressed(Buttons.DPadUp)) { Logger.Debug("Gamepad Up pressed"); _onInput("Up"); }
+            if (IsPressed(Buttons.DPadDown)) { Logger.Debug("Gamepad Down pressed"); _onInput("Down"); }
 
             _previousState = currentState;
 
