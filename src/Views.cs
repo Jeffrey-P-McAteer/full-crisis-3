@@ -20,6 +20,9 @@ public partial class MainWindow : Window
         DataContext = viewModel;
         Loaded += (s, e) => SetupQuitDialogButtons();
         
+        // Configure window manager hints for better tiling WM support
+        ConfigureWindowManagerHints();
+        
         // Watch for quit dialog visibility changes to set initial focus
         viewModel.PropertyChanged += (s, e) => 
         {
@@ -35,6 +38,31 @@ public partial class MainWindow : Window
                 }
             }
         };
+    }
+
+    private void ConfigureWindowManagerHints()
+    {
+        // Set window properties that help tiling window managers understand
+        // this is a game/media application that should float
+        
+        // Fixed size window - hints to tiling WMs that this shouldn't be tiled
+        CanResize = false;
+        
+        // Keep window on top for gaming experience (can be toggled by user if needed)
+        // Topmost = true; // Commented out - too aggressive for most users
+        
+        // Additional hints through window startup location and size constraints
+        WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterScreen;
+        
+        // These properties are already set in XAML but ensuring they're applied:
+        // - Fixed dimensions (1280x720)
+        // - CanResize=False 
+        // - SystemDecorations=Full (shows title bar for better WM integration)
+        // - SizeToContent=Manual (prevents auto-sizing)
+        
+        // Note: Tiling WM users can still override these with window rules like:
+        // i3/sway: for_window [title="Full Crisis 3"] floating enable
+        // or: for_window [class="FullCrisis3"] floating enable
     }
 
     private void SetupQuitDialogButtons()

@@ -6,7 +6,13 @@
         Title="Full Crisis 3"
         Width="1280" Height="720"
         WindowStartupLocation="CenterScreen"
-        Background="Black">
+        Background="Black"
+        CanResize="False"
+        MinWidth="1280" MinHeight="720"
+        MaxWidth="1280" MaxHeight="720"
+        SizeToContent="Manual"
+        ExtendClientAreaToDecorationsHint="False"
+        SystemDecorations="Full">
 
   <Panel>
     <Rectangle Fill="Black" />
