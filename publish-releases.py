@@ -255,7 +255,13 @@ def main():
     if not Path("FullCrisis3.sln").exists():
         print("ERROR: FullCrisis3.sln not found. Please run this script from the project root.")
         sys.exit(1)
-    
+
+    # Perform a build if requested
+    if 'build' in sys.argv or 'rebuild' in sys.argv:
+        subprocess.run(['uv', 'run', 'build.py', 'download-assets'], check=True)
+    else:
+        print('Skipping build because "build" not passed as argument')
+
     # Check if release files exist
     if not check_release_files():
         sys.exit(1)

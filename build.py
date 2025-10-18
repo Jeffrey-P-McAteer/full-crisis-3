@@ -86,6 +86,11 @@ def main():
     if not Path("FullCrisis3.sln").exists():
         print("ERROR: FullCrisis3.sln not found. Please run this script from the project root.")
         sys.exit(1)
+
+    if 'download-assets' in sys.argv:
+        subprocess.run(['uv', 'run', 'download-assets.py'], check=True)
+    else:
+        print('Not downloading assets because "download-assets" not passed as argument')
     
     # Clean release directory
     release_dir = clean_release_dir()
