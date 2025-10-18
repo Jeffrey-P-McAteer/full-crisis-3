@@ -71,6 +71,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> ConfirmQuitCommand { get; }
     public ReactiveCommand<Unit, Unit> CancelQuitCommand { get; }
+    
+    public Action<string>? QuitDialogNavigation { get; set; }
 
     public MainWindowViewModel()
     {
@@ -114,10 +116,28 @@ public class MainWindowViewModel : ViewModelBase
     {
         Dispatcher.UIThread.Post(() =>
         {
-            switch (input)
+            if (IsQuitDialogVisible)
             {
-                case "Cancel": HandleEscapeKey(); break;
-                case "Confirm" when IsQuitDialogVisible: Environment.Exit(0); break;
+                switch (input)
+                {
+                    case "Left":
+                    case "Right":
+                        QuitDialogNavigation?.Invoke(input);
+                        break;
+                    case "Confirm":
+                        QuitDialogNavigation?.Invoke("Confirm");
+                        break;
+                    case "Cancel":
+                        CancelQuitCommand.Execute(Unit.Default);
+                        break;
+                }
+            }
+            else
+            {
+                switch (input)
+                {
+                    case "Cancel": HandleEscapeKey(); break;
+                }
             }
         });
     }

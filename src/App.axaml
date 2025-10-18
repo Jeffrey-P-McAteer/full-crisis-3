@@ -52,5 +52,21 @@
       <Setter Property="BorderBrush" Value="Yellow" />
       <Setter Property="Foreground" Value="Yellow" />
     </Style>
+    
+    <Style Selector="Button.QuitDialogButton">
+      <Setter Property="FontFamily" Value="{StaticResource LetterGothicFont}" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="BorderBrush" Value="White" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="Padding" Value="15,8" />
+      <Setter Property="MinWidth" Value="120" />
+    </Style>
+    
+    <Style Selector="Button.QuitDialogButton:focus">
+      <Setter Property="Background" Value="#404040" />
+      <Setter Property="BorderBrush" Value="Yellow" />
+      <Setter Property="Foreground" Value="Yellow" />
+    </Style>
   </Application.Styles>
 </Application>

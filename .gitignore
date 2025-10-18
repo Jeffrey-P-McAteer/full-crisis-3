@@ -8,4 +8,5 @@ __pycache__
 # Third-party assets (can be re-downloaded via download-assets.py)
 thirdparty-assets/
 
+logs
 *.log

@@ -29,6 +29,8 @@ public class GamepadInput : IDisposable
             if (IsPressed(Buttons.B)) _onInput("Cancel");
             if (IsPressed(Buttons.DPadUp)) _onInput("Up");
             if (IsPressed(Buttons.DPadDown)) _onInput("Down");
+            if (IsPressed(Buttons.DPadLeft)) _onInput("Left");
+            if (IsPressed(Buttons.DPadRight)) _onInput("Right");
 
             _previousState = currentState;
 
