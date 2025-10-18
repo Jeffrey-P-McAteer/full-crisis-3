@@ -1,8 +1,8 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:FullCrisis3.Core.ViewModels"
-             xmlns:views="using:FullCrisis3.Desktop.Views"
-             x:Class="FullCrisis3.Desktop.App"
+             xmlns:vm="using:FullCrisis3.ViewModels"
+             xmlns:views="using:FullCrisis3.Views"
+             x:Class="FullCrisis3.App"
              Name="FullCrisis3Desktop"
              RequestedThemeVariant="Dark">
 

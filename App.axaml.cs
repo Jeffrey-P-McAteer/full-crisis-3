@@ -1,9 +1,9 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using FullCrisis3.Desktop.Views;
+using FullCrisis3.Views;
 
-namespace FullCrisis3.Desktop;
+namespace FullCrisis3;
 
 public partial class App : Application
 {

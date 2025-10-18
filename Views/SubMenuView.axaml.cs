@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace FullCrisis3.Desktop.Views;
+namespace FullCrisis3.Views;
 
 public partial class SubMenuView : UserControl
 {

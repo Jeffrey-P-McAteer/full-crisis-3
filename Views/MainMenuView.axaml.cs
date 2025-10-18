@@ -2,10 +2,10 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using System;
 using System.Linq;
-using FullCrisis3.Core.Input;
-using FullCrisis3.Core.ViewModels;
+using FullCrisis3.Input;
+using FullCrisis3.ViewModels;
 
-namespace FullCrisis3.Desktop.Views;
+namespace FullCrisis3.Views;
 
 public partial class MainMenuView : UserControl
 {

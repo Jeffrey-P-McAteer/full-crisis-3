@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Input;
-using FullCrisis3.Core.ViewModels;
+using FullCrisis3.ViewModels;
 using System;
 using System.Linq;
 using Avalonia.Interactivity;
 
-namespace FullCrisis3.Desktop.Views;
+namespace FullCrisis3.Views;
 
 public partial class MainWindow : Window
 {

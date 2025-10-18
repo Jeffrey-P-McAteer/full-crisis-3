@@ -15,13 +15,13 @@ def detect_platform():
     system = platform.system().lower()
     
     if system == "linux":
-        return "linux-x64", "FullCrisis3.Desktop"
+        return "linux-x64", "FullCrisis3"
     elif system == "windows":
-        return "win-x64", "FullCrisis3.Desktop.exe"
+        return "win-x64", "FullCrisis3.exe"
     elif system == "darwin":
         # macOS - use linux runtime as fallback
         print("WARNING: macOS detected, using linux-x64 runtime")
-        return "linux-x64", "FullCrisis3.Desktop"
+        return "linux-x64", "FullCrisis3"
     else:
         print(f"ERROR: Unsupported platform: {system}")
         sys.exit(1)
@@ -50,10 +50,10 @@ def run_command(cmd, cwd=None, description="", capture_output=False):
 
 def build_debug(runtime_id):
     """Build the debug version for the host platform"""
-    desktop_dir = Path("FullCrisis3.Desktop")
+    project_dir = Path(".")
     
-    if not desktop_dir.exists():
-        print("ERROR: FullCrisis3.Desktop directory not found")
+    if not Path("FullCrisis3.csproj").exists():
+        print("ERROR: FullCrisis3.csproj not found")
         sys.exit(1)
     
     # Build debug version
@@ -63,17 +63,17 @@ def build_debug(runtime_id):
         "-r", runtime_id
     ]
     
-    run_command(cmd, cwd=desktop_dir, description=f"Building debug version for {runtime_id}")
+    run_command(cmd, cwd=project_dir, description=f"Building debug version for {runtime_id}")
 
 def find_debug_executable(runtime_id, exe_name):
     """Find the debug executable in the build output"""
-    desktop_dir = Path("FullCrisis3.Desktop")
+    project_dir = Path(".")
     
     # Common debug output paths
     possible_paths = [
-        desktop_dir / "bin" / "Debug" / "net9.0" / runtime_id / exe_name,
-        desktop_dir / "bin" / "Debug" / "net9.0" / exe_name,
-        desktop_dir / "bin" / "Debug" / exe_name
+        project_dir / "bin" / "Debug" / "net9.0" / runtime_id / exe_name,
+        project_dir / "bin" / "Debug" / "net9.0" / exe_name,
+        project_dir / "bin" / "Debug" / exe_name
     ]
     
     for path in possible_paths:

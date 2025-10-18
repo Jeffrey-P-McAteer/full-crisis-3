@@ -41,7 +41,7 @@ def build_desktop(platform, runtime_id, output_name, release_dir):
     """Build desktop version for specified platform"""
     print(f"\nBuilding {platform} version...")
     
-    desktop_dir = Path("FullCrisis3.Desktop")
+    desktop_dir = Path(".")
     output_dir = release_dir / f"temp_{platform}"
     
     # Build command
@@ -61,7 +61,7 @@ def build_desktop(platform, runtime_id, output_name, release_dir):
     
     # Find the executable and copy to final location
     exe_extension = ".exe" if platform == "Windows" else ""
-    source_exe = output_dir / f"FullCrisis3.Desktop{exe_extension}"
+    source_exe = output_dir / f"FullCrisis3{exe_extension}"
     target_exe = release_dir / output_name
     
     if source_exe.exists():

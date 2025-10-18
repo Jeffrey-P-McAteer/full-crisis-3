@@ -1,7 +1,7 @@
 using ReactiveUI;
 using System.Reactive;
 
-namespace FullCrisis3.Core.ViewModels;
+namespace FullCrisis3.ViewModels;
 
 public class SubMenuViewModel : ViewModelBase
 {

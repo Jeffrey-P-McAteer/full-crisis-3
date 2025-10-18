@@ -4,7 +4,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace FullCrisis3.Core.Input;
+namespace FullCrisis3.Input;
 
 public class GamepadInputService : IDisposable
 {

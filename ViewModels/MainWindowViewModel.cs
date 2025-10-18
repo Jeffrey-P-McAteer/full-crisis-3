@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
-using FullCrisis3.Core.Input;
+using FullCrisis3.Input;
 
-namespace FullCrisis3.Core.ViewModels;
+namespace FullCrisis3.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
@@ -18,12 +18,16 @@ public class MainWindowViewModel : ViewModelBase
     {
         // Initialize gamepad input
         _gamepadInput = new GamepadInputService();
-        _gamepadInput.InputObservable.Subscribe(HandleGamepadInput);
-        _gamepadInput.DebugObservable.Subscribe(debug => 
-        {
-            System.Diagnostics.Debug.WriteLine($"[GAMEPAD DEBUG] {debug}");
-            Console.WriteLine($"[GAMEPAD DEBUG] {debug}");
-        });
+        _gamepadInput.InputObservable
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(HandleGamepadInput);
+        _gamepadInput.DebugObservable
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(debug => 
+            {
+                System.Diagnostics.Debug.WriteLine($"[GAMEPAD DEBUG] {debug}");
+                Console.WriteLine($"[GAMEPAD DEBUG] {debug}");
+            });
 
         // Initialize with main menu
         var mainMenuViewModel = new MainMenuViewModel();

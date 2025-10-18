@@ -1,7 +1,7 @@
 using Avalonia;
 using System;
 
-namespace FullCrisis3.Desktop;
+namespace FullCrisis3;
 
 public sealed class Program
 {
