@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using FullCrisis3.Input;
+using Avalonia.Threading;
 
 namespace FullCrisis3.ViewModels;
 
@@ -12,22 +13,10 @@ public class MainWindowViewModel : ViewModelBase
     private readonly Stack<ViewModelBase> _viewStack = new();
     private ViewModelBase? _currentView;
     private bool _isQuitDialogVisible;
-    private readonly GamepadInputService _gamepadInput;
+    private GamepadInputService? _gamepadInput;
 
     public MainWindowViewModel()
     {
-        // Initialize gamepad input
-        _gamepadInput = new GamepadInputService();
-        _gamepadInput.InputObservable
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(HandleGamepadInput);
-        _gamepadInput.DebugObservable
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(debug => 
-            {
-                System.Diagnostics.Debug.WriteLine($"[GAMEPAD DEBUG] {debug}");
-                Console.WriteLine($"[GAMEPAD DEBUG] {debug}");
-            });
 
         // Initialize with main menu
         var mainMenuViewModel = new MainMenuViewModel();
@@ -39,6 +28,35 @@ public class MainWindowViewModel : ViewModelBase
         // Setup commands
         ConfirmQuitCommand = ReactiveCommand.Create(ConfirmQuit);
         CancelQuitCommand = ReactiveCommand.Create(CancelQuit);
+        
+        // Initialize gamepad input after a short delay to ensure UI is ready
+        Dispatcher.UIThread.Post(() =>
+        {
+            InitializeGamepadInput();
+        }, DispatcherPriority.Background);
+    }
+
+    private void InitializeGamepadInput()
+    {
+        try
+        {
+            _gamepadInput = new GamepadInputService();
+            _gamepadInput.InputObservable
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(HandleGamepadInput);
+            _gamepadInput.DebugObservable
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(debug => 
+                {
+                    System.Diagnostics.Debug.WriteLine($"[GAMEPAD DEBUG] {debug}");
+                    Console.WriteLine($"[GAMEPAD DEBUG] {debug}");
+                });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[GAMEPAD ERROR] Failed to initialize gamepad input: {ex.Message}");
+            Console.WriteLine($"[GAMEPAD ERROR] Failed to initialize gamepad input: {ex.Message}");
+        }
     }
 
     public ViewModelBase? CurrentView

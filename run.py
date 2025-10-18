@@ -58,7 +58,7 @@ def build_debug(runtime_id):
     
     # Build debug version
     cmd = [
-        "dotnet", "build",
+        "dotnet", "build", "FullCrisis3.csproj",
         "-c", "Debug",
         "-r", runtime_id
     ]
