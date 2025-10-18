@@ -21,6 +21,8 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+    <PackageReference Include="MethodBoundaryAspect.Fody" Version="2.0.150" />
+    <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="All" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10" />
   </ItemGroup>

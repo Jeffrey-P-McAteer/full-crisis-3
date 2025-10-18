@@ -8,6 +8,7 @@ namespace FullCrisis3;
 
 public class ViewModelBase : ReactiveObject { }
 
+[AutoLog]
 public class MainMenuViewModel : ViewModelBase
 {
     public ReactiveCommand<Unit, Unit> NewGameCommand { get; }
@@ -20,14 +21,14 @@ public class MainMenuViewModel : ViewModelBase
 
     public MainMenuViewModel()
     {
-        Logger.LogMethod();
-        NewGameCommand = ReactiveCommand.Create(() => { Logger.LogMethod("NewGameCommand"); NavigateToSubMenu?.Invoke("New Game"); });
-        LoadGameCommand = ReactiveCommand.Create(() => { Logger.LogMethod("LoadGameCommand"); NavigateToSubMenu?.Invoke("Load Game"); });
-        SettingsCommand = ReactiveCommand.Create(() => { Logger.LogMethod("SettingsCommand"); NavigateToSubMenu?.Invoke("Settings"); });
-        QuitCommand = ReactiveCommand.Create(() => { Logger.LogMethod("QuitCommand"); ShowQuitDialog?.Invoke(); });
+        NewGameCommand = ReactiveCommand.Create(() => NavigateToSubMenu?.Invoke("New Game"));
+        LoadGameCommand = ReactiveCommand.Create(() => NavigateToSubMenu?.Invoke("Load Game"));
+        SettingsCommand = ReactiveCommand.Create(() => NavigateToSubMenu?.Invoke("Settings"));
+        QuitCommand = ReactiveCommand.Create(() => ShowQuitDialog?.Invoke());
     }
 }
 
+[AutoLog]
 public class SubMenuViewModel : ViewModelBase
 {
     private string _title = string.Empty;
@@ -48,6 +49,7 @@ public class SubMenuViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit>? BackCommand { get; set; }
 }
 
+[AutoLog]
 public class MainWindowViewModel : ViewModelBase
 {
     private readonly Stack<ViewModelBase> _viewStack = new();
@@ -72,21 +74,19 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        Logger.LogMethod();
         var mainMenuViewModel = new MainMenuViewModel();
         mainMenuViewModel.NavigateToSubMenu = NavigateToSubMenu;
-        mainMenuViewModel.ShowQuitDialog = () => { Logger.LogMethod("ShowQuitDialog"); IsQuitDialogVisible = true; };
+        mainMenuViewModel.ShowQuitDialog = () => IsQuitDialogVisible = true;
         CurrentView = mainMenuViewModel;
 
-        ConfirmQuitCommand = ReactiveCommand.Create(() => { Logger.LogMethod("ConfirmQuit"); Environment.Exit(0); });
-        CancelQuitCommand = ReactiveCommand.Create(() => { Logger.LogMethod("CancelQuit"); IsQuitDialogVisible = false; });
+        ConfirmQuitCommand = ReactiveCommand.Create(() => { Environment.Exit(0); });
+        CancelQuitCommand = ReactiveCommand.Create(() => { IsQuitDialogVisible = false; });
 
         Dispatcher.UIThread.Post(() => _gamepadInput = new GamepadInput(HandleInput), DispatcherPriority.Background);
     }
 
     public void HandleEscapeKey()
     {
-        Logger.LogMethod();
         if (IsQuitDialogVisible)
         {
             IsQuitDialogVisible = false;
@@ -101,19 +101,17 @@ public class MainWindowViewModel : ViewModelBase
 
     private void NavigateToSubMenu(string menuType)
     {
-        Logger.LogMethod(nameof(NavigateToSubMenu), menuType);
         if (CurrentView != null) _viewStack.Push(CurrentView);
         CurrentView = new SubMenuViewModel
         {
             Title = menuType,
             ContentText = $"Content area for {menuType}",
-            BackCommand = ReactiveCommand.Create(() => { Logger.LogMethod("BackCommand"); CurrentView = _viewStack.Count > 0 ? _viewStack.Pop() : CurrentView; })
+            BackCommand = ReactiveCommand.Create(() => { CurrentView = _viewStack.Count > 0 ? _viewStack.Pop() : CurrentView; })
         };
     }
 
     private void HandleInput(string input)
     {
-        Logger.LogMethod(nameof(HandleInput), input);
         Dispatcher.UIThread.Post(() =>
         {
             switch (input)
