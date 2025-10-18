@@ -19,6 +19,11 @@ public class MainWindowViewModel : ViewModelBase
         // Initialize gamepad input
         _gamepadInput = new GamepadInputService();
         _gamepadInput.InputObservable.Subscribe(HandleGamepadInput);
+        _gamepadInput.DebugObservable.Subscribe(debug => 
+        {
+            System.Diagnostics.Debug.WriteLine($"[GAMEPAD DEBUG] {debug}");
+            Console.WriteLine($"[GAMEPAD DEBUG] {debug}");
+        });
 
         // Initialize with main menu
         var mainMenuViewModel = new MainMenuViewModel();
@@ -118,16 +123,29 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     ConfirmQuit();
                 }
-                // Note: Actual gamepad navigation would be handled by the View layer
-                // This is just a placeholder for the service integration
+                else if (CurrentView is MainMenuViewModel mainMenu)
+                {
+                    // Trigger the currently focused menu item
+                    // This will work with the focus-based system we implemented
+                    GamepadConfirmAction?.Invoke();
+                }
                 break;
             case GamepadInput.NavigateUp:
+                GamepadNavigateAction?.Invoke("Up");
+                break;
             case GamepadInput.NavigateDown:
+                GamepadNavigateAction?.Invoke("Down");
+                break;
             case GamepadInput.NavigateLeft:
+                GamepadNavigateAction?.Invoke("Left");
+                break;
             case GamepadInput.NavigateRight:
-                // Navigation is handled by the View layer through focus management
-                // This service provides the foundation for gamepad input detection
+                GamepadNavigateAction?.Invoke("Right");
                 break;
         }
     }
+
+    // Actions that Views can subscribe to for gamepad input
+    public Action? GamepadConfirmAction { get; set; }
+    public Action<string>? GamepadNavigateAction { get; set; }
 }

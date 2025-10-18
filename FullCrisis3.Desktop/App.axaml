@@ -52,25 +52,11 @@
       </Setter>
     </Style>
     
-    <!-- Mouse hover state -->
-    <Style Selector="Button.MenuButton:pointerover">
+    <!-- Focus state (mouse, keyboard, or gamepad) -->
+    <Style Selector="Button.MenuButton:focus">
       <Setter Property="Background" Value="#404040" />
       <Setter Property="BorderBrush" Value="Yellow" />
       <Setter Property="Foreground" Value="Yellow" />
-    </Style>
-    
-    <!-- Keyboard/gamepad focus state -->
-    <Style Selector="Button.MenuButton:focus">
-      <Setter Property="Background" Value="#404040" />
-      <Setter Property="BorderBrush" Value="Cyan" />
-      <Setter Property="Foreground" Value="Cyan" />
-    </Style>
-    
-    <!-- Combined hover and focus (when both mouse and keyboard) -->
-    <Style Selector="Button.MenuButton:pointerover:focus">
-      <Setter Property="Background" Value="#505050" />
-      <Setter Property="BorderBrush" Value="Orange" />
-      <Setter Property="Foreground" Value="Orange" />
     </Style>
     
     <!-- Pressed state -->
