@@ -21,26 +21,26 @@ class MainMenuBackground(ThreeDScene):
         self.set_camera_orientation(phi=75 * DEGREES, theta=-45 * DEGREES)
         
         # Create 3D axes with subtle grid
-        axes = ThreeDAxes(
-            x_range=[-6, 6, 2],
-            y_range=[-4, 4, 2], 
-            z_range=[-3, 3, 1],
-            x_length=8,
-            y_length=6,
-            z_length=4,
-            axis_config={"color": BLUE_E, "stroke_width": 1},
-        )
-        axes.set_opacity(0.3)
+        # axes = ThreeDAxes(
+        #     x_range=[-6, 6, 2],
+        #     y_range=[-4, 4, 2],
+        #     z_range=[-3, 3, 1],
+        #     x_length=8,
+        #     y_length=6,
+        #     z_length=4,
+        #     axis_config={"color": BLUE_E, "stroke_width": 1},
+        # )
+        # axes.set_opacity(0.3)
         
         # Create floating geometric shapes
         cube = Cube(side_length=1.5, fill_color=BLUE, fill_opacity=0.7, stroke_color=WHITE)
         cube.move_to([2, 1, 0])
         
-        sphere = Sphere(radius=0.8, fill_color=RED, fill_opacity=0.6)
-        sphere.move_to([-2, -1, 1])
+        # sphere = Sphere(radius=0.8, fill_color=RED, fill_opacity=0.6)
+        # sphere.move_to([-2, -1, 1])
         
-        torus = Torus(major_radius=1.2, minor_radius=0.4, fill_color=GREEN, fill_opacity=0.8)
-        torus.move_to([0, 2, -1])
+        # torus = Torus(major_radius=1.2, minor_radius=0.4, fill_color=GREEN, fill_opacity=0.8)
+        # torus.move_to([0, 2, -1])
         
         # Create particle system effect
         particles = VGroup()
@@ -57,16 +57,17 @@ class MainMenuBackground(ThreeDScene):
             particles.add(particle)
         
         # Add all objects to scene
-        self.add(axes, cube, sphere, torus, particles)
-        
+        #self.add(axes, cube, sphere, torus, particles)
+        self.add(cube, particles)
+
         # Animate camera movement (first 4 seconds)
         self.move_camera(phi=60 * DEGREES, theta=-60 * DEGREES, run_time=4)
         
         # Animate shapes rotation and movement (next 4 seconds)
         self.play(
             Rotate(cube, angle=PI, axis=UP, about_point=cube.get_center()),
-            Rotate(sphere, angle=2*PI, axis=RIGHT, about_point=sphere.get_center()),
-            Rotate(torus, angle=PI, axis=OUT, about_point=torus.get_center()),
+            #Rotate(sphere, angle=2*PI, axis=RIGHT, about_point=sphere.get_center()),
+            #Rotate(torus, angle=PI, axis=OUT, about_point=torus.get_center()),
             run_time=4
         )
         
@@ -112,3 +113,4 @@ def render_background():
 
 if __name__ == "__main__":
     render_background()
+

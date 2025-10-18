@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FullCrisis3"
+        x:Class="FullCrisis3.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Full Crisis 3"
+        Width="1280" Height="720"
+        WindowStartupLocation="CenterScreen"
+        Background="Black">
+
+  <Panel>
+    <Rectangle Fill="Black" />
+    <ContentControl Content="{Binding CurrentView}" />
+    
+    <Border Background="#80000000" IsVisible="{Binding IsQuitDialogVisible}">
+      <Border Background="#2F2F2F" BorderBrush="White" BorderThickness="2" 
+              CornerRadius="10" Padding="30" 
+              HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="20">
+          <TextBlock Text="Quit Full-Crisis?" FontSize="20" Foreground="White" HorizontalAlignment="Center" />
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+            <Button Content="Quit" Background="DarkRed" Padding="15,8" MinWidth="120" Command="{Binding ConfirmQuitCommand}" />
+            <Button Content="Keep Playing" Background="DarkGreen" Padding="15,8" MinWidth="120" Command="{Binding CancelQuitCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+  </Panel>
+</Window>
