@@ -6,8 +6,8 @@
              RequestedThemeVariant="Dark">
 
   <Application.Resources>
-    <FontFamily x:Key="RockwellFont">avares://FullCrisis3/thirdparty/fonts#Rockwell</FontFamily>
-    <FontFamily x:Key="LetterGothicFont">avares://FullCrisis3/thirdparty/fonts#Letter Gothic</FontFamily>
+    <FontFamily x:Key="RockwellFont">avares://FullCrisis3/thirdparty-assets/fonts#Rockwell</FontFamily>
+    <FontFamily x:Key="LetterGothicFont">avares://FullCrisis3/thirdparty-assets/fonts#Letter Gothic</FontFamily>
   </Application.Resources>
 
   <Application.DataTemplates>

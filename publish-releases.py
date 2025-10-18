@@ -19,7 +19,7 @@ from pathlib import Path
 import webbrowser
 import datetime
 
-# thirdparty
+# third-party dependencies
 import git
 
 BUILD_TIMESTAMP = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')

@@ -22,13 +22,13 @@ class Asset:
 
 # Global asset configuration - file paths relative to repository root
 THIRDPARTY_ASSETS = {
-    "thirdparty/fonts/Rockwell.ttf":
+    "thirdparty-assets/fonts/Rockwell.ttf":
         Asset("https://dn.freefontsfamily.com/download/rockwell-font", "ROCK.TTF"),
-    "thirdparty/fonts/Letter-Gothic.ttf":
+    "thirdparty-assets/fonts/Letter-Gothic.ttf":
         Asset("https://media.fontsgeek.com/download/zip/l/e/letter-gothic_WIGQV.zip", "Letter Gothic/Letter Gothic Regular/Letter Gothic Regular.ttf"),
     # Example ZIP archive extraction:
-    # "thirdparty/examples/font.ttf": Asset("https://example.com/fonts.zip", "font.ttf"),
-    # "thirdparty/images/texture.png": Asset("https://example.com/assets.zip", "textures/texture.png"),
+    # "thirdparty-assets/examples/font.ttf": Asset("https://example.com/fonts.zip", "font.ttf"),
+    # "thirdparty-assets/images/texture.png": Asset("https://example.com/assets.zip", "textures/texture.png"),
 }
 
 def download_asset(asset: Asset, filepath: Path) -> bool:
