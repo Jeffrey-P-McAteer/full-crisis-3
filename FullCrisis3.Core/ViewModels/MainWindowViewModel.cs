@@ -118,11 +118,15 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     ConfirmQuit();
                 }
-                else if (CurrentView is MainMenuViewModel mainMenu)
-                {
-                    // Simulate clicking the first menu item for now
-                    mainMenu.NewGameCommand.Execute().Subscribe();
-                }
+                // Note: Actual gamepad navigation would be handled by the View layer
+                // This is just a placeholder for the service integration
+                break;
+            case GamepadInput.NavigateUp:
+            case GamepadInput.NavigateDown:
+            case GamepadInput.NavigateLeft:
+            case GamepadInput.NavigateRight:
+                // Navigation is handled by the View layer through focus management
+                // This service provides the foundation for gamepad input detection
                 break;
         }
     }
