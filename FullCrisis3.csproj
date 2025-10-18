@@ -25,4 +25,9 @@
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AvaloniaResource Include="thirdparty\fonts\Rockwell.ttf" />
+    <AvaloniaResource Include="thirdparty\fonts\Letter-Gothic.ttf" />
+  </ItemGroup>
+
 </Project>

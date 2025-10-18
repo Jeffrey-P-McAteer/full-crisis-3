@@ -5,6 +5,11 @@
              x:Class="FullCrisis3.App"
              RequestedThemeVariant="Dark">
 
+  <Application.Resources>
+    <FontFamily x:Key="RockwellFont">avares://FullCrisis3/thirdparty/fonts#Rockwell</FontFamily>
+    <FontFamily x:Key="LetterGothicFont">avares://FullCrisis3/thirdparty/fonts#Letter Gothic</FontFamily>
+  </Application.Resources>
+
   <Application.DataTemplates>
     <DataTemplate DataType="vm:MainMenuViewModel">
       <views:MainMenuView />
@@ -18,6 +23,7 @@
     <FluentTheme />
     
     <Style Selector="TextBlock.Title">
+      <Setter Property="FontFamily" Value="{StaticResource RockwellFont}" />
       <Setter Property="FontSize" Value="48" />
       <Setter Property="FontWeight" Value="Bold" />
       <Setter Property="Foreground" Value="White" />
@@ -25,6 +31,7 @@
     </Style>
     
     <Style Selector="Button.MenuButton">
+      <Setter Property="FontFamily" Value="{StaticResource LetterGothicFont}" />
       <Setter Property="FontSize" Value="20" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderBrush" Value="White" />
@@ -34,6 +41,10 @@
       <Setter Property="Margin" Value="0,8" />
       <Setter Property="HorizontalAlignment" Value="Center" />
       <Setter Property="MinWidth" Value="200" />
+    </Style>
+    
+    <Style Selector="TextBlock">
+      <Setter Property="FontFamily" Value="{StaticResource LetterGothicFont}" />
     </Style>
     
     <Style Selector="Button.MenuButton:focus">
