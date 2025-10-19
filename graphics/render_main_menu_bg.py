@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-3D animated background generator for main menu
-Generates a 12-second MP4 with simple 3D design
+3D animated cityscape background for main menu
+Continuous looping animation with prism buildings and particle effects
 """
 
 # /// script
@@ -17,75 +17,134 @@ import numpy as np
 
 class MainMenuBackground(ThreeDScene):
     def construct(self):
-        # Set up 3D camera with dynamic movement
-        self.set_camera_orientation(phi=75 * DEGREES, theta=-45 * DEGREES)
+        # Set up 3D camera for cityscape view
+        self.set_camera_orientation(phi=70 * DEGREES, theta=-30 * DEGREES, distance=15)
         
-        # Create 3D axes with subtle grid
-        # axes = ThreeDAxes(
-        #     x_range=[-6, 6, 2],
-        #     y_range=[-4, 4, 2],
-        #     z_range=[-3, 3, 1],
-        #     x_length=8,
-        #     y_length=6,
-        #     z_length=4,
-        #     axis_config={"color": BLUE_E, "stroke_width": 1},
-        # )
-        # axes.set_opacity(0.3)
+        # Create 2D grid floor
+        grid_size = 20
+        grid_spacing = 1
+        grid_lines = VGroup()
         
-        # Create floating geometric shapes
-        cube = Cube(side_length=1.5, fill_color=BLUE, fill_opacity=0.7, stroke_color=WHITE)
-        cube.move_to([2, 1, 0])
+        # Create grid lines
+        for i in range(-grid_size//2, grid_size//2 + 1):
+            # X-direction lines
+            line_x = Line3D(
+                start=[i * grid_spacing, -grid_size//2 * grid_spacing, 0],
+                end=[i * grid_spacing, grid_size//2 * grid_spacing, 0],
+                color=BLUE_E,
+                stroke_width=1
+            )
+            grid_lines.add(line_x)
+            
+            # Y-direction lines
+            line_y = Line3D(
+                start=[-grid_size//2 * grid_spacing, i * grid_spacing, 0],
+                end=[grid_size//2 * grid_spacing, i * grid_spacing, 0],
+                color=BLUE_E,
+                stroke_width=1
+            )
+            grid_lines.add(line_y)
         
-        # sphere = Sphere(radius=0.8, fill_color=RED, fill_opacity=0.6)
-        # sphere.move_to([-2, -1, 1])
+        grid_lines.set_opacity(0.3)
         
-        # torus = Torus(major_radius=1.2, minor_radius=0.4, fill_color=GREEN, fill_opacity=0.8)
-        # torus.move_to([0, 2, -1])
+        # Create cityscape using prisms (buildings)
+        buildings = VGroup()
+        building_positions = [
+            ([-3, -2, 0], 2.5, BLUE),
+            ([1, -3, 0], 3.2, GREEN),
+            ([-1, 1, 0], 1.8, RED),
+            ([3, 2, 0], 2.9, ORANGE),
+            ([-4, 3, 0], 2.1, PURPLE),
+            ([2, -1, 0], 3.5, YELLOW),
+            ([-2, -4, 0], 1.5, PINK),
+            ([4, -2, 0], 2.7, TEAL),
+            ([0, 3, 0], 2.3, MAROON),
+            ([-3, 0, 0], 1.9, GREY),
+        ]
         
-        # Create particle system effect
+        for pos, height, color in building_positions:
+            building = Prism(
+                dimensions=[0.8, 0.8, height],
+                fill_color=color,
+                fill_opacity=0.7,
+                stroke_color=WHITE,
+                stroke_width=1
+            )
+            building.move_to([pos[0], pos[1], height/2])
+            buildings.add(building)
+        
+        # Create particle effects hovering up from the grid
         particles = VGroup()
-        for i in range(20):
+        for i in range(15):  # Reduced from 50 to 15
             particle = Dot3D(
                 point=[
-                    np.random.uniform(-4, 4),
-                    np.random.uniform(-3, 3), 
-                    np.random.uniform(-2, 2)
+                    np.random.uniform(-6, 6),
+                    np.random.uniform(-6, 6),
+                    np.random.uniform(0.1, 1.5)
                 ],
                 radius=0.05,
-                color=random_color()
+                color=interpolate_color(BLUE, WHITE, np.random.random())
             )
             particles.add(particle)
         
         # Add all objects to scene
-        #self.add(axes, cube, sphere, torus, particles)
-        self.add(cube, particles)
-
-        # Animate camera movement (first 4 seconds)
-        self.move_camera(phi=60 * DEGREES, theta=-60 * DEGREES, run_time=4)
+        self.add(grid_lines, buildings, particles)
         
-        # Animate shapes rotation and movement (next 4 seconds)
+        # Create continuous looping animation
+        # First half: Camera orbits while buildings and particles animate
+        building_animations = []
+        building_animations.extend([
+            Rotate(building, angle=PI/4, axis=UP, about_point=building.get_center()) 
+            for building in buildings[::2]
+        ])
+        building_animations.extend([
+            Rotate(building, angle=-PI/4, axis=UP, about_point=building.get_center()) 
+            for building in buildings[1::2]
+        ])
+        
+        particle_animations = [
+            particle.animate.shift([
+                np.random.uniform(-0.5, 0.5),
+                np.random.uniform(-0.5, 0.5),
+                np.random.uniform(1, 3)
+            ]) for particle in particles
+        ]
+        
+        # Start camera movement and animations simultaneously
+        self.begin_ambient_camera_rotation(rate=0.15)
+        
         self.play(
-            Rotate(cube, angle=PI, axis=UP, about_point=cube.get_center()),
-            #Rotate(sphere, angle=2*PI, axis=RIGHT, about_point=sphere.get_center()),
-            #Rotate(torus, angle=PI, axis=OUT, about_point=torus.get_center()),
-            run_time=4
+            *building_animations,
+            *particle_animations,
+            run_time=4  # Reduced from 6 to 4
         )
         
-        # Move camera during shape animation
-        self.move_camera(phi=45 * DEGREES, theta=-90 * DEGREES, run_time=0.1)
+        # Second half: Reverse animations while camera continues
+        reverse_building_animations = []
+        reverse_building_animations.extend([
+            Rotate(building, angle=-PI/4, axis=UP, about_point=building.get_center()) 
+            for building in buildings[::2]
+        ])
+        reverse_building_animations.extend([
+            Rotate(building, angle=PI/4, axis=UP, about_point=building.get_center()) 
+            for building in buildings[1::2]
+        ])
         
-        # Final camera sweep and particle animation (last 4 seconds)
+        reset_particle_animations = [
+            particle.animate.move_to([
+                np.random.uniform(-6, 6),
+                np.random.uniform(-6, 6),
+                np.random.uniform(0.1, 1.5)
+            ]) for particle in particles
+        ]
+        
         self.play(
-            *[particle.animate.shift([
-                np.random.uniform(-1, 1),
-                np.random.uniform(-1, 1),
-                np.random.uniform(-1, 1)
-            ]) for particle in particles],
-            run_time=4
+            *reverse_building_animations,
+            *reset_particle_animations,
+            run_time=4  # Reduced from 6 to 4
         )
         
-        # Final camera position
-        self.move_camera(phi=90 * DEGREES, theta=-30 * DEGREES, run_time=0.1)
+        self.stop_ambient_camera_rotation()
 
 def render_background():
     """Render the main menu background animation to MP4"""
@@ -98,11 +157,12 @@ def render_background():
     # Ensure output directory exists
     os.makedirs(build_dir, exist_ok=True)
     
-    # Configure manim to output MP4 at 30fps
+    # Configure manim to output MP4 at lower quality for faster rendering
     config.media_dir = build_dir
     config.output_file = "main-menu-bg"
     config.format = "mp4"
-    config.frame_rate = 30
+    config.frame_rate = 15  # Reduced from 30 to 15
+    config.quality = "low_quality"  # Use low quality for faster rendering
     
     # Create and render the scene
     scene = MainMenuBackground()

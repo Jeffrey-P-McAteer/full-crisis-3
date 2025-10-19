@@ -57,7 +57,7 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             margin: 0;
-            padding: 0;
+            padding: 80pt 0pt 0pt 0pt;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -84,8 +84,12 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
         .download-section {
             margin: 30px 0;
         }
+        .download-button-holder {
+            display: flex;
+            flex-direction: row;
+        }
         .download-button {
-            display: inline-block;
+            /*display: inline-block;*/
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
@@ -96,6 +100,12 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
             font-size: 1.1em;
             transition: transform 0.2s, box-shadow 0.2s;
             min-width: 200px;
+            display: flex;
+            align-items: center;   /* Vertically centers items */
+            justify-content: center; /* Horizontally centers items (optional) */
+            text-decoration: none; /* Removes underline */
+            gap: 8px; /* Space between image and text */
+            flex-direction: row;
         }
         .download-button:hover {
             transform: translateY(-2px);
@@ -163,20 +173,23 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
 <body>
     <div class="container">
         <h1>Full Crisis 3</h1>
-        <p class="subtitle">Cross-platform 2D game built with .NET 9 and MonoGame</p>
+        <p class="subtitle">
+             Join historic disasters as emergency response personnel and hone your crisis-solving skills while saving the world!
+        </p>
         
         <div class="download-section">
             <h2>Download Latest Release</h2>
-            
-            <a href="FullCrisis3.linux.x64" class="download-button" download>
-                <span class="platform-icon">🐧</span>
-                Linux x64
-            </a>
-            
-            <a href="FullCrisis3.win.x64.exe" class="download-button" download>
-                <span class="platform-icon">🪟</span>
-                Windows x64
-            </a>
+            <div class="download-button-holder">
+                <a href="FullCrisis3.linux.x64" class="download-button" style="width:35%;">
+                    <img class="platform-icon" src="linux-icon.png" width="64" height="64" />
+                    <span>Linux x64</span>
+                </a>
+
+                <a href="FullCrisis3.win.x64.exe" class="download-button" style="width:35%;">
+                    <img class="platform-icon" src="windows-icon.png" width="64" height="64" />
+                    <span>Windows x64</span>
+                </a>
+            </div>
         </div>
         
         <div class="controls">
@@ -283,13 +296,21 @@ def create_pages_branch(temp_dir):
     # run_command(["git", "config", "user.email", "noreply@github.com"], cwd=temp_path, description="Setting git user email")
     
     # Copy release files
-    release_dir = Path("release")
+    repo_dir = Path(os.path.join(os.path.dirname(__file__)))
+    release_dir = repo_dir / "release"
     
     linux_exe = release_dir / "FullCrisis3.linux.x64"
     windows_exe = release_dir / "FullCrisis3.win.x64.exe"
     
     shutil.copy2(linux_exe, temp_path / "FullCrisis3.linux.x64")
     shutil.copy2(windows_exe, temp_path / "FullCrisis3.win.x64.exe")
+
+    linux_icon_png = repo_dir / "graphics" / "linux-icon.png"
+    windows_icon_png = repo_dir / "graphics" / "windows-icon.png"
+
+    shutil.copy2(linux_icon_png, temp_path / "linux-icon.png")
+    shutil.copy2(windows_icon_png, temp_path / "windows-icon.png")
+
     
     # Generate project statistics chart
     chart_data = generate_project_stats_chart()
