@@ -91,17 +91,7 @@ class MainMenuBackground(ThreeDScene):
         self.add(grid_lines, buildings, particles)
         
         # Create continuous looping animation
-        # First half: Camera orbits while buildings and particles animate
-        building_animations = []
-        building_animations.extend([
-            Rotate(building, angle=PI/4, axis=UP, about_point=building.get_center()) 
-            for building in buildings[::2]
-        ])
-        building_animations.extend([
-            Rotate(building, angle=-PI/4, axis=UP, about_point=building.get_center()) 
-            for building in buildings[1::2]
-        ])
-        
+        # Camera orbits while particles animate, buildings stay stationary
         particle_animations = [
             particle.animate.shift([
                 np.random.uniform(-0.5, 0.5),
@@ -114,22 +104,11 @@ class MainMenuBackground(ThreeDScene):
         self.begin_ambient_camera_rotation(rate=0.15)
         
         self.play(
-            *building_animations,
             *particle_animations,
-            run_time=4  # Reduced from 6 to 4
+            run_time=4
         )
         
-        # Second half: Reverse animations while camera continues
-        reverse_building_animations = []
-        reverse_building_animations.extend([
-            Rotate(building, angle=-PI/4, axis=UP, about_point=building.get_center()) 
-            for building in buildings[::2]
-        ])
-        reverse_building_animations.extend([
-            Rotate(building, angle=PI/4, axis=UP, about_point=building.get_center()) 
-            for building in buildings[1::2]
-        ])
-        
+        # Second half: Continue camera rotation with particle reset
         reset_particle_animations = [
             particle.animate.move_to([
                 np.random.uniform(-6, 6),
@@ -139,9 +118,8 @@ class MainMenuBackground(ThreeDScene):
         ]
         
         self.play(
-            *reverse_building_animations,
             *reset_particle_animations,
-            run_time=4  # Reduced from 6 to 4
+            run_time=4
         )
         
         self.stop_ambient_camera_rotation()

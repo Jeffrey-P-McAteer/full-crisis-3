@@ -53,8 +53,20 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Full Crisis 3 - Download</title>
     <style>
+        @font-face {
+          font-family: "Letter-Gothic";
+          src: url("Letter-Gothic.ttf") format("truetype");
+          font-weight: normal;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Rockwell";
+          src: url("Rockwell.ttf") format("truetype");
+          font-weight: normal;
+          font-style: normal;
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Letter-Gothic', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             margin: 0;
             padding: 80pt 0pt 0pt 0pt;
@@ -62,6 +74,9 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        h1, h2, h3 {
+            font-family: 'Rockwell', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .container {
             background: white;
@@ -310,6 +325,12 @@ def create_pages_branch(temp_dir):
 
     shutil.copy2(linux_icon_png, temp_path / "linux-icon.png")
     shutil.copy2(windows_icon_png, temp_path / "windows-icon.png")
+
+    letter_gothic_ttf = repo_dir / "thirdparty-assets" / "fonts" / "Letter-Gothic.ttf"
+    rockwell_ttf = repo_dir / "thirdparty-assets" / "fonts" / "Rockwell.ttf"
+
+    shutil.copy2(letter_gothic_ttf, temp_path / "Letter-Gothic.ttf")
+    shutil.copy2(rockwell_ttf, temp_path / "Rockwell.ttf")
 
     
     # Generate project statistics chart
