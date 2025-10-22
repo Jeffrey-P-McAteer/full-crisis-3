@@ -14,14 +14,14 @@
         <TextBlock Text="Audio Settings" FontSize="20" Foreground="White" FontWeight="Bold" />
         
         <StackPanel Spacing="15">
-          <Grid ColumnDefinitions="*,Auto" HorizontalAlignment="Center">
-            <TextBlock Grid.Column="0" Text="Audio Enabled" FontSize="16" Foreground="White" VerticalAlignment="Center" Margin="0,0,20,0" />
-            <CheckBox Grid.Column="1" IsChecked="{Binding AudioEnabled}" VerticalAlignment="Center" />
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0" Text="Audio Enabled" FontSize="16" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            <CheckBox Grid.Column="1" IsChecked="{Binding AudioEnabled}" VerticalAlignment="Center" HorizontalAlignment="Right" />
           </Grid>
           
-          <Grid ColumnDefinitions="*,Auto" HorizontalAlignment="Center">
-            <TextBlock Grid.Column="0" Text="Background Music" FontSize="16" Foreground="White" VerticalAlignment="Center" Margin="0,0,20,0" />
-            <CheckBox Grid.Column="1" IsChecked="{Binding BackgroundMusicEnabled}" VerticalAlignment="Center" />
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0" Text="Background Music" FontSize="16" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            <CheckBox Grid.Column="1" IsChecked="{Binding BackgroundMusicEnabled}" VerticalAlignment="Center" HorizontalAlignment="Right" />
           </Grid>
         </StackPanel>
         
