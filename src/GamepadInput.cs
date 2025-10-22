@@ -11,6 +11,22 @@ public class GamepadInput : IDisposable
     private readonly Action<string> _onInput;
     private GamePadState _previousState;
 
+    public static string GetControllerName()
+    {
+        try
+        {
+            var state = GamePad.GetState(Microsoft.Xna.Framework.PlayerIndex.One);
+            if (state.IsConnected)
+            {
+                return "Xbox Compatible Controller";
+            }
+        }
+        catch
+        {
+        }
+        return "No controller detected";
+    }
+
     public GamepadInput(Action<string> onInput)
     {
         _onInput = onInput;

@@ -51,6 +51,48 @@ public class SubMenuViewModel : ViewModelBase
 }
 
 [AutoLog]
+public class SettingsViewModel : ViewModelBase
+{
+    private readonly AppSettings _settings;
+    private bool _audioEnabled;
+    private bool _backgroundMusicEnabled;
+
+    public bool AudioEnabled
+    {
+        get => _audioEnabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _audioEnabled, value);
+            _settings.AudioEnabled = value;
+            _settings.Save();
+        }
+    }
+
+    public bool BackgroundMusicEnabled
+    {
+        get => _backgroundMusicEnabled;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _backgroundMusicEnabled, value);
+            _settings.BackgroundMusicEnabled = value;
+            _settings.Save();
+        }
+    }
+
+    public string ControllerName => GamepadInput.GetControllerName();
+    public string AppDataLocation => AppSettings.AppDataLocation;
+
+    public ReactiveCommand<Unit, Unit>? BackCommand { get; set; }
+
+    public SettingsViewModel()
+    {
+        _settings = AppSettings.Load();
+        _audioEnabled = _settings.AudioEnabled;
+        _backgroundMusicEnabled = _settings.BackgroundMusicEnabled;
+    }
+}
+
+[AutoLog]
 public class MainWindowViewModel : ViewModelBase
 {
     private readonly Stack<ViewModelBase> _viewStack = new();
@@ -105,12 +147,23 @@ public class MainWindowViewModel : ViewModelBase
     private void NavigateToSubMenu(string menuType)
     {
         if (CurrentView != null) _viewStack.Push(CurrentView);
-        CurrentView = new SubMenuViewModel
+        
+        if (menuType == "Settings")
         {
-            Title = menuType,
-            ContentText = $"Content area for {menuType}",
-            BackCommand = ReactiveCommand.Create(() => { CurrentView = _viewStack.Count > 0 ? _viewStack.Pop() : CurrentView; })
-        };
+            CurrentView = new SettingsViewModel
+            {
+                BackCommand = ReactiveCommand.Create(() => { CurrentView = _viewStack.Count > 0 ? _viewStack.Pop() : CurrentView; })
+            };
+        }
+        else
+        {
+            CurrentView = new SubMenuViewModel
+            {
+                Title = menuType,
+                ContentText = $"Content area for {menuType}",
+                BackCommand = ReactiveCommand.Create(() => { CurrentView = _viewStack.Count > 0 ? _viewStack.Pop() : CurrentView; })
+            };
+        }
     }
 
     private void HandleInput(string input)

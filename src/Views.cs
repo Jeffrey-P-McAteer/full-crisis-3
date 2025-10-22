@@ -256,3 +256,12 @@ public partial class SubMenuView : UserControl
         InitializeComponent(); 
     }
 }
+
+[AutoLog]
+public partial class SettingsView : UserControl
+{
+    public SettingsView()
+    {
+        InitializeComponent();
+    }
+}

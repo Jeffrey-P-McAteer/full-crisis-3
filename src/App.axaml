@@ -17,6 +17,9 @@
     <DataTemplate DataType="vm:SubMenuViewModel">
       <views:SubMenuView />
     </DataTemplate>
+    <DataTemplate DataType="vm:SettingsViewModel">
+      <views:SettingsView />
+    </DataTemplate>
   </Application.DataTemplates>
 
   <Application.Styles>
