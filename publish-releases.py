@@ -332,6 +332,9 @@ def create_pages_branch(temp_dir):
     shutil.copy2(letter_gothic_ttf, temp_path / "Letter-Gothic.ttf")
     shutil.copy2(rockwell_ttf, temp_path / "Rockwell.ttf")
 
+    # Create the CNAME file, used by github itself for custom domains
+    with open(temp_path / "CNAME", 'w') as fd:
+        fd.write('full-crisis-3.jmcateer.com\n')
     
     # Generate project statistics chart
     chart_data = generate_project_stats_chart()
