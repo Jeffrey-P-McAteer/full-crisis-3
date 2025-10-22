@@ -14,14 +14,14 @@
         <TextBlock Text="Audio Settings" FontSize="20" Foreground="White" FontWeight="Bold" />
         
         <StackPanel Spacing="15">
-          <Grid ColumnDefinitions="*,Auto">
-            <TextBlock Grid.Column="0" Text="Audio Enabled" FontSize="16" Foreground="White" VerticalAlignment="Center" />
-            <CheckBox Grid.Column="1" IsChecked="{Binding AudioEnabled}" />
+          <Grid ColumnDefinitions="*,Auto" HorizontalAlignment="Center">
+            <TextBlock Grid.Column="0" Text="Audio Enabled" FontSize="16" Foreground="White" VerticalAlignment="Center" Margin="0,0,20,0" />
+            <CheckBox Grid.Column="1" IsChecked="{Binding AudioEnabled}" VerticalAlignment="Center" />
           </Grid>
           
-          <Grid ColumnDefinitions="*,Auto">
-            <TextBlock Grid.Column="0" Text="Background Music" FontSize="16" Foreground="White" VerticalAlignment="Center" />
-            <CheckBox Grid.Column="1" IsChecked="{Binding BackgroundMusicEnabled}" />
+          <Grid ColumnDefinitions="*,Auto" HorizontalAlignment="Center">
+            <TextBlock Grid.Column="0" Text="Background Music" FontSize="16" Foreground="White" VerticalAlignment="Center" Margin="0,0,20,0" />
+            <CheckBox Grid.Column="1" IsChecked="{Binding BackgroundMusicEnabled}" VerticalAlignment="Center" />
           </Grid>
         </StackPanel>
         
@@ -40,8 +40,10 @@
         
         <StackPanel Spacing="10">
           <TextBlock Text="Data Location:" FontSize="16" Foreground="White" />
-          <TextBlock Text="{Binding AppDataLocation}" FontSize="14" Foreground="LightGray" 
-                     TextWrapping="Wrap" MaxWidth="500" />
+          <TextBox Text="{Binding AppDataLocation}" FontSize="14" Foreground="LightGray" 
+                   Background="Transparent" BorderThickness="1" BorderBrush="Gray"
+                   IsReadOnly="True" TextWrapping="Wrap" MaxWidth="500" 
+                   Padding="5" VerticalContentAlignment="Center" />
         </StackPanel>
         
       </StackPanel>
