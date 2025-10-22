@@ -83,6 +83,12 @@
       <Setter Property="MinWidth" Value="100" />
     </Style>
     
+    <!-- CheckBox focus styling -->
+    <Style Selector="CheckBox:focus">
+      <Setter Property="BorderBrush" Value="Yellow" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+    
     <Style Selector="TextBlock">
       <Setter Property="FontFamily" Value="{StaticResource LetterGothicFont}" />
     </Style>

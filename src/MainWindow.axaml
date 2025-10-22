@@ -16,7 +16,7 @@
 
   <Panel>
     <Rectangle Fill="Black" />
-    <ContentControl Content="{Binding CurrentView}" />
+    <ContentControl Content="{Binding CurrentView}" IsEnabled="{Binding !IsQuitDialogVisible}" />
     
     <Border Background="#80000000" IsVisible="{Binding IsQuitDialogVisible}">
       <Border Background="#2F2F2F" BorderBrush="White" BorderThickness="2" 
@@ -25,8 +25,8 @@
         <StackPanel Spacing="20">
           <TextBlock Text="Quit Full-Crisis?" FontSize="20" Foreground="White" HorizontalAlignment="Center" />
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
-            <Button x:Name="QuitButton" Content="Quit" Background="DarkRed" Classes="CustomButton QuitDialogButton" Command="{Binding ConfirmQuitCommand}" />
-            <Button x:Name="KeepPlayingButton" Content="Keep Playing" Background="DarkGreen" Classes="CustomButton QuitDialogButton" Command="{Binding CancelQuitCommand}" />
+            <Button x:Name="QuitButton" Content="Quit" Background="DarkRed" Classes="CustomButton QuitDialogButton" Command="{Binding ConfirmQuitCommand}" TabIndex="0" />
+            <Button x:Name="KeepPlayingButton" Content="Keep Playing" Background="DarkGreen" Classes="CustomButton QuitDialogButton" Command="{Binding CancelQuitCommand}" TabIndex="1" />
           </StackPanel>
         </StackPanel>
       </Border>

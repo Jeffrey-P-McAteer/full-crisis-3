@@ -11,6 +11,7 @@ public partial class MainWindow : Window
 {
     private Button[] _quitDialogButtons = Array.Empty<Button>();
     private int _quitDialogSelectedIndex = 0;
+    private readonly InputManager _quitDialogInputManager = new();
 
     public MainWindow()
     {
@@ -73,10 +74,19 @@ public partial class MainWindow : Window
             this.FindControl<Button>("KeepPlayingButton")!
         };
 
+        // Setup InputManager for quit dialog
+        _quitDialogInputManager.ClearSelectables();
+        
         for (int i = 0; i < _quitDialogButtons.Length; i++)
         {
             var index = i;
-            _quitDialogButtons[i].PointerEntered += (s, e) => { _quitDialogSelectedIndex = index; _quitDialogButtons[_quitDialogSelectedIndex].Focus(); };
+            var button = _quitDialogButtons[i];
+            
+            _quitDialogInputManager.RegisterSelectable(
+                button, 
+                tabIndex: i,
+                onSelected: item => _quitDialogSelectedIndex = index
+            );
         }
     }
 
@@ -99,31 +109,22 @@ public partial class MainWindow : Window
 
     private void HandleQuitDialogNavigation(KeyEventArgs e)
     {
-        if (_quitDialogButtons.Length == 0) return;
-
-        switch (e.Key)
+        // Handle escape key specifically
+        if (e.Key == Key.Escape)
         {
-            case Key.Left or Key.A:
-                _quitDialogSelectedIndex = (_quitDialogSelectedIndex - 1 + _quitDialogButtons.Length) % _quitDialogButtons.Length;
-                _quitDialogButtons[_quitDialogSelectedIndex].Focus();
+            if (DataContext is MainWindowViewModel vm)
+            {
+                vm.CancelQuitCommand.Execute(Unit.Default);
                 e.Handled = true;
-                break;
-            case Key.Right or Key.D:
-                _quitDialogSelectedIndex = (_quitDialogSelectedIndex + 1) % _quitDialogButtons.Length;
-                _quitDialogButtons[_quitDialogSelectedIndex].Focus();
-                e.Handled = true;
-                break;
-            case Key.Enter or Key.Space:
-                _quitDialogButtons[_quitDialogSelectedIndex].Command?.Execute(null);
-                e.Handled = true;
-                break;
-            case Key.Escape:
-                if (DataContext is MainWindowViewModel vm)
-                {
-                    vm.CancelQuitCommand.Execute(Unit.Default);
-                    e.Handled = true;
-                }
-                break;
+            }
+            return;
+        }
+
+        // Let InputManager handle all other navigation
+        if (_quitDialogInputManager.HandleKeyInput(e))
+        {
+            // InputManager handled the key
+            return;
         }
     }
 
@@ -132,7 +133,7 @@ public partial class MainWindow : Window
         if (_quitDialogButtons.Length > 0)
         {
             _quitDialogSelectedIndex = 0; // Start with first button (Quit)
-            _quitDialogButtons[_quitDialogSelectedIndex].Focus();
+            _quitDialogInputManager.SelectItem(0);
         }
     }
 
@@ -155,22 +156,7 @@ public partial class MainWindow : Window
 
     private void HandleGamepadQuitDialogNavigation(string input)
     {
-        if (_quitDialogButtons.Length == 0) return;
-
-        switch (input)
-        {
-            case "Left":
-                _quitDialogSelectedIndex = (_quitDialogSelectedIndex - 1 + _quitDialogButtons.Length) % _quitDialogButtons.Length;
-                _quitDialogButtons[_quitDialogSelectedIndex].Focus();
-                break;
-            case "Right":
-                _quitDialogSelectedIndex = (_quitDialogSelectedIndex + 1) % _quitDialogButtons.Length;
-                _quitDialogButtons[_quitDialogSelectedIndex].Focus();
-                break;
-            case "Confirm":
-                _quitDialogButtons[_quitDialogSelectedIndex].Command?.Execute(null);
-                break;
-        }
+        _quitDialogInputManager.HandleGamepadInput(input);
     }
 }
 
@@ -179,6 +165,7 @@ public partial class MainMenuView : UserControl
 {
     private Button[] _buttons = Array.Empty<Button>();
     private int _selectedIndex = 0;
+    private readonly InputManager _inputManager = new();
 
     public MainMenuView()
     {
@@ -206,36 +193,27 @@ public partial class MainMenuView : UserControl
             this.FindControl<Button>("QuitButton")!
         };
 
+        // Setup InputManager for main menu
+        _inputManager.ClearSelectables();
+        
         for (int i = 0; i < _buttons.Length; i++)
         {
             var index = i;
-            _buttons[i].PointerEntered += (s, e) => { _selectedIndex = index; _buttons[_selectedIndex].Focus(); };
+            var button = _buttons[i];
+            
+            _inputManager.RegisterSelectable(
+                button, 
+                tabIndex: i,
+                onSelected: item => _selectedIndex = index
+            );
         }
 
-        if (_buttons.Length > 0) _buttons[0].Focus();
+        if (_buttons.Length > 0) _inputManager.SelectItem(0);
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (_buttons.Length == 0) return;
-
-        switch (e.Key)
-        {
-            case Key.Up or Key.W:
-                _selectedIndex = (_selectedIndex - 1 + _buttons.Length) % _buttons.Length;
-                _buttons[_selectedIndex].Focus();
-                e.Handled = true;
-                break;
-            case Key.Down or Key.S:
-                _selectedIndex = (_selectedIndex + 1) % _buttons.Length;
-                _buttons[_selectedIndex].Focus();
-                e.Handled = true;
-                break;
-            case Key.Enter or Key.Space:
-                _buttons[_selectedIndex].Command?.Execute(null);
-                e.Handled = true;
-                break;
-        }
+        _inputManager.HandleKeyInput(e);
     }
 
     public void FocusQuitButton()
@@ -243,7 +221,7 @@ public partial class MainMenuView : UserControl
         if (_buttons.Length > 3) // Quit button is at index 3
         {
             _selectedIndex = 3;
-            _buttons[_selectedIndex].Focus();
+            _inputManager.SelectItem(3);
         }
     }
 }
@@ -260,8 +238,36 @@ public partial class SubMenuView : UserControl
 [AutoLog]
 public partial class SettingsView : UserControl
 {
+    private readonly InputManager _inputManager = new();
+
     public SettingsView()
     {
         InitializeComponent();
+        Loaded += (s, e) => SetupControls();
+        KeyDown += OnKeyDown;
+    }
+
+    private void SetupControls()
+    {
+        var controls = new Control[]
+        {
+            this.FindControl<CheckBox>("AudioEnabledCheckBox")!,
+            this.FindControl<CheckBox>("BackgroundMusicCheckBox")!,
+            this.FindControl<Button>("BackButton")!
+        };
+
+        _inputManager.ClearSelectables();
+        
+        for (int i = 0; i < controls.Length; i++)
+        {
+            _inputManager.RegisterSelectable(controls[i], tabIndex: i);
+        }
+
+        if (controls.Length > 0) _inputManager.SelectItem(0);
+    }
+
+    private void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        _inputManager.HandleKeyInput(e);
     }
 }
