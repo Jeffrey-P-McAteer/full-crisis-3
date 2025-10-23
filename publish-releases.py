@@ -22,7 +22,6 @@ import tempfile
 from pathlib import Path
 import webbrowser
 import datetime
-import base64
 
 # third-party dependencies
 import git
@@ -238,7 +237,9 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="project-status">
             <h3>Project Status</h3>
             <div class="chart-container">
-                <img src="data:image/png;base64,{CHART_DATA}" alt="Lines of Code Over Time" />
+                <a href="lines_of_code_over_time.png" target="_blank">
+                    <img src="lines_of_code_over_time.png" alt="Lines of Code Over Time" />
+                </a>
             </div>
         </div>
         
@@ -268,8 +269,8 @@ def run_command(cmd, cwd=None, description="", capture_output=True):
                 print(f"Stderr: {e.stderr}")
         return False
 
-def generate_project_stats_chart():
-    """Generate project statistics chart and return base64 encoded image"""
+def copy_project_stats_chart(dest_dir):
+    """Generate and copy project statistics chart to destination directory"""
     print("Generating project statistics chart...")
     
     with tempfile.TemporaryDirectory() as stats_temp_dir:
@@ -278,20 +279,20 @@ def generate_project_stats_chart():
             "uv", "run", "project-stats.py", stats_temp_dir
         ], description="Generating project statistics"):
             print("WARNING: Failed to generate project statistics chart")
-            return None
+            return False
         
-        # Read the generated chart file
+        # Check if the generated chart file exists
         chart_file = Path(stats_temp_dir) / "lines_of_code_over_time.png"
         if not chart_file.exists():
             print("WARNING: Chart file not found after generation")
-            return None
+            return False
         
-        # Convert to base64
-        with open(chart_file, 'rb') as f:
-            chart_data = base64.b64encode(f.read()).decode('utf-8')
+        # Copy the chart file to destination directory
+        dest_chart_file = Path(dest_dir) / "lines_of_code_over_time.png"
+        shutil.copy2(chart_file, dest_chart_file)
         
-        print("SUCCESS: Project statistics chart generated and encoded")
-        return chart_data
+        print("SUCCESS: Project statistics chart generated and copied")
+        return True
 
 def check_release_files():
     """Check if required release files exist"""
@@ -354,22 +355,22 @@ def create_pages_branch(temp_dir):
     with open(temp_path / "CNAME", 'w') as fd:
         fd.write('full-crisis-3.jmcateer.com\n')
     
-    # Generate project statistics chart
-    chart_data = generate_project_stats_chart()
+    # Generate and copy project statistics chart
+    chart_success = copy_project_stats_chart(temp_path)
     
-    # Create index.html with embedded chart
+    # Create index.html
     index_file = temp_path / "index.html"
     with open(index_file, 'w', encoding='utf-8') as f:
         html_content = INDEX_HTML_TEMPLATE
-        if chart_data:
-            html_content = html_content.replace("{CHART_DATA}", chart_data)
-        else:
+        if not chart_success:
             # If chart generation failed, remove the chart section
             html_content = html_content.replace(
                 '''        <div class="project-status">
             <h3>Project Status</h3>
             <div class="chart-container">
-                <img src="data:image/png;base64,{CHART_DATA}" alt="Lines of Code Over Time" />
+                <a href="lines_of_code_over_time.png" target="_blank">
+                    <img src="lines_of_code_over_time.png" alt="Lines of Code Over Time" />
+                </a>
             </div>
         </div>
         ''', '')
