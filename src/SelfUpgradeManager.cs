@@ -180,7 +180,7 @@ public static class SelfUpgradeManager
     }
 
     /// <summary>
-    /// Downloads a file from the specified URL
+    /// Downloads a file from the specified URL with progress reporting
     /// </summary>
     private static async Task<bool> DownloadFileAsync(string url, string destinationPath)
     {
@@ -189,7 +189,7 @@ public static class SelfUpgradeManager
             using var httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromMinutes(5); // 5 minute timeout for download
             
-            using var response = await httpClient.GetAsync(url);
+            using var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
             {
                 Logger.LogMethod("DownloadFileAsync", $"HTTP error: {response.StatusCode} - {response.ReasonPhrase}");
@@ -201,9 +201,15 @@ public static class SelfUpgradeManager
             {
                 Logger.Info($"Download size: {contentLength.Value / 1024 / 1024:F1} MB");
             }
+            else
+            {
+                Logger.Info("Download size: Unknown");
+            }
 
             using var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
-            await response.Content.CopyToAsync(fileStream);
+            using var downloadStream = await response.Content.ReadAsStreamAsync();
+            
+            await CopyStreamWithProgressAsync(downloadStream, fileStream, contentLength);
             
             return true;
         }
@@ -212,6 +218,67 @@ public static class SelfUpgradeManager
             Logger.LogMethod("DownloadFileAsync", $"Error downloading file: {ex.Message}");
             return false;
         }
+    }
+
+    /// <summary>
+    /// Copies data from source stream to destination with progress reporting
+    /// </summary>
+    private static async Task CopyStreamWithProgressAsync(Stream source, Stream destination, long? totalBytes)
+    {
+        var buffer = new byte[8192];
+        long totalBytesRead = 0;
+        int lastReportedPercentage = -1;
+        var startTime = DateTime.UtcNow;
+        
+        Console.Write("Progress: 0%");
+        
+        int bytesRead;
+        while ((bytesRead = await source.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        {
+            await destination.WriteAsync(buffer, 0, bytesRead);
+            totalBytesRead += bytesRead;
+            
+            if (totalBytes.HasValue && totalBytes.Value > 0)
+            {
+                var percentage = (int)((totalBytesRead * 100) / totalBytes.Value);
+                
+                // Report progress every 5%
+                if (percentage >= lastReportedPercentage + 5)
+                {
+                    lastReportedPercentage = percentage - (percentage % 5); // Round down to nearest 5%
+                    
+                    // Calculate ETA
+                    var elapsed = DateTime.UtcNow - startTime;
+                    var eta = "Unknown";
+                    
+                    if (percentage > 0)
+                    {
+                        var totalEstimatedTime = TimeSpan.FromMilliseconds(elapsed.TotalMilliseconds * 100 / percentage);
+                        var remaining = totalEstimatedTime - elapsed;
+                        
+                        if (remaining.TotalSeconds > 0)
+                        {
+                            if (remaining.TotalMinutes >= 1)
+                            {
+                                eta = $"{remaining.Minutes}m {remaining.Seconds}s";
+                            }
+                            else
+                            {
+                                eta = $"{remaining.Seconds}s";
+                            }
+                        }
+                        else
+                        {
+                            eta = "Almost done";
+                        }
+                    }
+                    
+                    Console.Write($"\rProgress: {lastReportedPercentage}% (ETA: {eta})");
+                }
+            }
+        }
+        
+        Console.WriteLine("\rProgress: 100% - Download complete!");
     }
 
     /// <summary>

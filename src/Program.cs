@@ -13,58 +13,24 @@ public sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        // Preprocess arguments to handle -v, -vv, -vvv patterns
-        var processedArgs = PreprocessVerbosityArgs(args);
-        
         // Parse command line arguments using CommandLineParser
-        Parser.Default.ParseArguments<CliArguments>(processedArgs)
+        Parser.Default.ParseArguments<CliArguments>(args)
             .WithParsed(arguments => RunApplication(arguments).GetAwaiter().GetResult())
             .WithNotParsed(HandleParseError);
     }
 
-    private static string[] PreprocessVerbosityArgs(string[] args)
-    {
-        var processedArgs = new List<string>();
-        
-        foreach (var arg in args)
-        {
-            switch (arg)
-            {
-                case "-v":
-                    processedArgs.Add("--verbosity");
-                    processedArgs.Add("1");
-                    break;
-                case "-vv":
-                    processedArgs.Add("--verbosity");
-                    processedArgs.Add("2");
-                    break;
-                case "-vvv":
-                    processedArgs.Add("--verbosity");
-                    processedArgs.Add("3");
-                    break;
-                default:
-                    processedArgs.Add(arg);
-                    break;
-            }
-        }
-        
-        return processedArgs.ToArray();
-    }
 
     private static async Task RunApplication(CliArguments arguments)
     {
         // Store parsed arguments globally
         GlobalArgs.Current = arguments;
         
-        // Attach to console based on launch method and CLI arguments
-        var attachedToConsole = ConsoleManager.AttachToParentConsoleIfNeeded(
-            forceAttach: arguments.AttachConsole, 
-            preventAttach: arguments.NoConsole);
+        // Attach to console based on launch method
+        var attachedToConsole = ConsoleManager.AttachToParentConsoleIfNeeded();
         
         // Initialize logger with parsed arguments
-        Logger.Initialize(arguments.LogFile, arguments.EffectiveVerbosity);
+        Logger.Initialize(arguments.LogFile, 1); // Default verbosity level
         Logger.LogMethod(nameof(Main), $"Arguments: {string.Join(" ", Environment.GetCommandLineArgs())}");
-        Logger.Info($"Verbosity level: {arguments.EffectiveVerbosity}");
         Logger.Info($"Log file: {arguments.LogFile ?? "Console only"}");
         Logger.Info($"Console attached: {attachedToConsole}");
         Logger.Info($"Launched from command line: {ConsoleManager.WasLaunchedFromCommandLine()}");
