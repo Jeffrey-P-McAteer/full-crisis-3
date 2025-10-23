@@ -58,17 +58,24 @@ public partial class MainWindow : Window
         // Window mode based on CLI arguments
         if (args.Fullscreen)
         {
+            // Remove size constraints for fullscreen
+            ClearValue(WidthProperty);
+            ClearValue(HeightProperty);
+            ClearValue(MinWidthProperty);
+            ClearValue(MinHeightProperty);
+            ClearValue(MaxWidthProperty);
+            ClearValue(MaxHeightProperty);
             WindowState = Avalonia.Controls.WindowState.FullScreen;
         }
         else if (args.Windowed || args.DebugUI)
         {
             WindowState = Avalonia.Controls.WindowState.Normal;
-            CanResize = args.DebugUI; // Allow resize in debug mode
+            CanResize = true; // Allow resize in debug mode
         }
         else
         {
-            // Default: Fixed size window - hints to tiling WMs that this shouldn't be tiled
-            CanResize = false;
+            WindowState = Avalonia.Controls.WindowState.Normal;
+            CanResize = true; // Default allows resizing at all times
         }
         
         WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterScreen;
