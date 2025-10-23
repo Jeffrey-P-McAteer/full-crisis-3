@@ -121,6 +121,7 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
             text-decoration: none; /* Removes underline */
             gap: 8px; /* Space between image and text */
             flex-direction: row;
+            width: 35%;
         }
         .download-button:hover {
             transform: translateY(-2px);
@@ -183,6 +184,15 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
             color: #888;
             font-size: 0.9em;
         }
+        /* Mobile Style Adjustments */
+        @media (max-aspect-ratio: 1/1) {
+            .download-button-holder {
+                flex-direction: column;
+            }
+            .download-button {
+                width: 85%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -195,12 +205,12 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="download-section">
             <h2>Download Latest Release</h2>
             <div class="download-button-holder">
-                <a href="FullCrisis3.linux.x64" class="download-button" style="width:35%;">
+                <a href="FullCrisis3.linux.x64" class="download-button">
                     <img class="platform-icon" src="linux-icon.png" width="64" height="64" />
                     <span>Linux x64</span>
                 </a>
 
-                <a href="FullCrisis3.win.x64.exe" class="download-button" style="width:35%;">
+                <a href="FullCrisis3.win.x64.exe" class="download-button">
                     <img class="platform-icon" src="windows-icon.png" width="64" height="64" />
                     <span>Windows x64</span>
                 </a>
