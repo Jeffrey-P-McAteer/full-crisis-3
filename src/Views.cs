@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using System;
 using System.Reactive;
@@ -25,6 +26,7 @@ public partial class MainWindow : Window
         viewModel.QuitDialogNavigation = HandleGamepadQuitDialogNavigation;
         DataContext = viewModel;
         Loaded += (s, e) => SetupQuitDialogButtons();
+        Loaded += this.OnWindowLoaded;
         
         // Configure window manager hints for better tiling WM support
         ConfigureWindowManagerHints();
@@ -67,12 +69,7 @@ public partial class MainWindow : Window
             ClearValue(MaxHeightProperty);
             WindowState = Avalonia.Controls.WindowState.FullScreen;
         }
-        else if (args.Windowed || args.DebugUI)
-        {
-            WindowState = Avalonia.Controls.WindowState.Normal;
-            CanResize = true; // Allow resize in debug mode
-        }
-        else
+        else /*if (args.Windowed || args.DebugUI)*/
         {
             WindowState = Avalonia.Controls.WindowState.Normal;
             CanResize = true; // Default allows resizing at all times
@@ -89,6 +86,20 @@ public partial class MainWindow : Window
         // Note: Tiling WM users can still override these with window rules like:
         // i3/sway: for_window [title="Full Crisis 3"] floating enable
         // or: for_window [class="FullCrisis3"] floating enable
+    }
+
+    private void OnWindowLoaded(object? sender, RoutedEventArgs e)
+    {
+        var args = GlobalArgs.Current;
+
+        if (!args.Fullscreen)
+        {
+            // Clear constraints
+            ClearValue(MinWidthProperty);
+            ClearValue(MinHeightProperty);
+            ClearValue(MaxWidthProperty);
+            ClearValue(MaxHeightProperty);
+        }
     }
 
     private void SetupQuitDialogButtons()
