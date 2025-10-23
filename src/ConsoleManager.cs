@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Management;
@@ -8,7 +7,7 @@ using System.Management;
 namespace FullCrisis3;
 
 /// <summary>
-/// Manages console attachment for WinExe applications based on how they were launched
+/// Manages console attachment for applications based on how they were launched
 /// </summary>
 public static class ConsoleManager
 {
@@ -120,30 +119,6 @@ public static class ConsoleManager
                     return parent.ProcessName;
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                // Use /proc filesystem on Linux
-                try
-                {
-                    var statFile = $"/proc/{currentProcess.Id}/stat";
-                    if (File.Exists(statFile))
-                    {
-                        var statContent = File.ReadAllText(statFile);
-                        var fields = statContent.Split(' ');
-                        
-                        // Field 3 (0-based index 3) contains the parent process ID
-                        if (fields.Length > 3 && int.TryParse(fields[3], out var parentPid))
-                        {
-                            var parentProcess = Process.GetProcessById(parentPid);
-                            return parentProcess.ProcessName;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogMethod("GetParentProcessName", $"Error reading /proc on Linux: {ex.Message}");
-                }
-            }
         }
         catch (Exception ex)
         {
@@ -154,18 +129,20 @@ public static class ConsoleManager
     }
 
     /// <summary>
-    /// Attaches to the parent console if the application was launched from command line
+    /// Handles console attachment/detachment based on launch method and user preferences
+    /// On Windows: Releases console if launched from explorer.exe, keeps it otherwise
+    /// On Linux: Always keeps console (Linux handles this automatically)
     /// </summary>
     /// <param name="forceAttach">Force console attachment regardless of launch method</param>
     /// <param name="preventAttach">Prevent console attachment even if launched from command line</param>
-    /// <returns>True if successfully attached or already has console, false otherwise</returns>
+    /// <returns>True if console is attached or should remain attached, false if detached</returns>
     public static bool AttachToParentConsoleIfNeeded(bool forceAttach = false, bool preventAttach = false)
     {
-        // Console attachment is Windows-only
+        // On non-Windows platforms, console is automatically handled by the OS
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            Logger.LogMethod("AttachToParentConsoleIfNeeded", "Console attachment not supported on this platform");
-            return false;
+            Logger.LogMethod("AttachToParentConsoleIfNeeded", "Console handling automatic on this platform");
+            return true;
         }
 
         try
@@ -184,6 +161,19 @@ public static class ConsoleManager
                 return true;
             }
 
+            // Check if we were launched from explorer.exe and should release the console
+            var parentProcessName = GetParentProcessName();
+            bool launchedFromExplorer = !string.IsNullOrEmpty(parentProcessName) && 
+                                      parentProcessName.ToLowerInvariant() == "explorer";
+            
+            // If launched from explorer and not forced to attach, release the console
+            if (launchedFromExplorer && !forceAttach)
+            {
+                Logger.LogMethod("AttachToParentConsoleIfNeeded", "Launched from explorer.exe - releasing console");
+                DetachConsole();
+                return false;
+            }
+            
             // Determine if we should attach based on launch method or force flag
             bool shouldAttach = forceAttach || WasLaunchedFromCommandLine();
             
