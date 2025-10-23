@@ -55,11 +55,18 @@ public sealed class Program
         // Store parsed arguments globally
         GlobalArgs.Current = arguments;
         
+        // Attach to console based on launch method and CLI arguments
+        var attachedToConsole = ConsoleManager.AttachToParentConsoleIfNeeded(
+            forceAttach: arguments.AttachConsole, 
+            preventAttach: arguments.NoConsole);
+        
         // Initialize logger with parsed arguments
         Logger.Initialize(arguments.LogFile, arguments.EffectiveVerbosity);
         Logger.LogMethod(nameof(Main), $"Arguments: {string.Join(" ", Environment.GetCommandLineArgs())}");
         Logger.Info($"Verbosity level: {arguments.EffectiveVerbosity}");
         Logger.Info($"Log file: {arguments.LogFile ?? "Console only"}");
+        Logger.Info($"Console attached: {attachedToConsole}");
+        Logger.Info($"Launched from command line: {ConsoleManager.WasLaunchedFromCommandLine()}");
         
         // Convert remaining args for Avalonia
         var avaloniaArgs = arguments.AvaloniaArgs?.ToArray() ?? Array.Empty<string>();

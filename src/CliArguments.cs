@@ -37,6 +37,12 @@ public class CliArguments
     [Option("debug-ui", Required = false, HelpText = "Enable UI debugging features")]
     public bool DebugUI { get; set; }
 
+    [Option("attach-console", Required = false, HelpText = "Force console attachment regardless of launch method")]
+    public bool AttachConsole { get; set; }
+
+    [Option("no-console", Required = false, HelpText = "Prevent console attachment even when launched from command line")]
+    public bool NoConsole { get; set; }
+
     // Allow pass-through of unknown arguments to Avalonia
     [Value(0, MetaName = "avalonia-args", HelpText = "Additional arguments passed to Avalonia framework")]
     public IEnumerable<string>? AvaloniaArgs { get; set; }
