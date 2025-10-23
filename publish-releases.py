@@ -160,7 +160,7 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
             border-radius: 8px;
             padding: 20px;
             margin-top: 30px;
-            text-align: center;
+            text-align: left;
         }
         .project-status h3 {
             margin-top: 0;
@@ -225,6 +225,14 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
                 <li><strong>Back/Cancel:</strong> Escape or Gamepad B button</li>
                 <li><strong>Quit:</strong> Escape (from main menu)</li>
             </ul>
+        </div>
+
+        <div class="project-status">
+            <h3>Code</h3>
+            <p>
+                Code for this project resides at
+                <a href="https://github.com/Jeffrey-P-McAteer/full-crisis-3">github.com/Jeffrey-P-McAteer/full-crisis-3</a>.
+            </p>
         </div>
         
         <div class="project-status">
