@@ -163,6 +163,15 @@ public class SimpleGamepadInput : IDisposable
 
     public SimpleGamepadInput(Action<string> onInput, Action<bool>? onConnectionChanged = null)
     {
+        // Check if gamepad is disabled via CLI arguments
+        if (GlobalArgs.Current.NoGamepad)
+        {
+            Logger.LogMethod("SimpleGamepadInput Constructor", "Gamepad input disabled via --no-gamepad argument");
+            _onInput = onInput;
+            _onConnectionChanged = onConnectionChanged ?? (_ => { });
+            return;
+        }
+
         _onInput = onInput;
         _onConnectionChanged = onConnectionChanged ?? (_ => { });
         

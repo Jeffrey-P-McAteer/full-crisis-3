@@ -48,16 +48,29 @@ public partial class MainWindow : Window
 
     private void ConfigureWindowManagerHints()
     {
-        // Set window properties that help tiling window managers understand
-        // this is a game/media application that should float
+        // Use CLI arguments for window configuration
+        var args = GlobalArgs.Current;
         
-        // Fixed size window - hints to tiling WMs that this shouldn't be tiled
-        CanResize = false;
+        // Window size from CLI arguments
+        Width = args.Width;
+        Height = args.Height;
         
-        // Keep window on top for gaming experience (can be toggled by user if needed)
-        // Topmost = true; // Commented out - too aggressive for most users
+        // Window mode based on CLI arguments
+        if (args.Fullscreen)
+        {
+            WindowState = Avalonia.Controls.WindowState.FullScreen;
+        }
+        else if (args.Windowed || args.DebugUI)
+        {
+            WindowState = Avalonia.Controls.WindowState.Normal;
+            CanResize = args.DebugUI; // Allow resize in debug mode
+        }
+        else
+        {
+            // Default: Fixed size window - hints to tiling WMs that this shouldn't be tiled
+            CanResize = false;
+        }
         
-        // Additional hints through window startup location and size constraints
         WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterScreen;
         
         // These properties are already set in XAML but ensuring they're applied:
