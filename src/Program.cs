@@ -13,10 +13,73 @@ public sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        // Combine command line args with environment variable args
+        var allArgs = CombineArgsWithEnvironment(args);
+        
         // Parse command line arguments using CommandLineParser
-        Parser.Default.ParseArguments<CliArguments>(args)
+        Parser.Default.ParseArguments<CliArguments>(allArgs)
             .WithParsed(arguments => RunApplication(arguments).GetAwaiter().GetResult())
             .WithNotParsed(HandleParseError);
+    }
+
+    private static string[] CombineArgsWithEnvironment(string[] commandLineArgs)
+    {
+        var envArgs = Environment.GetEnvironmentVariable("FULL_CRISIS_3_ARGS");
+        
+        if (string.IsNullOrWhiteSpace(envArgs))
+        {
+            return commandLineArgs;
+        }
+        
+        // Parse environment variable arguments (space-separated)
+        var envArgsList = ParseSpaceSeparatedArgs(envArgs);
+        
+        // Combine environment args first, then command line args
+        // Command line args take precedence over environment args
+        var combinedArgs = new List<string>();
+        combinedArgs.AddRange(envArgsList);
+        combinedArgs.AddRange(commandLineArgs);
+        
+        Console.WriteLine($"Environment args: {envArgs}");
+        Console.WriteLine($"Combined args: {string.Join(" ", combinedArgs)}");
+        
+        return combinedArgs.ToArray();
+    }
+    
+    private static List<string> ParseSpaceSeparatedArgs(string args)
+    {
+        var result = new List<string>();
+        var current = new System.Text.StringBuilder();
+        bool inQuotes = false;
+        
+        for (int i = 0; i < args.Length; i++)
+        {
+            char c = args[i];
+            
+            if (c == '"')
+            {
+                inQuotes = !inQuotes;
+            }
+            else if (c == ' ' && !inQuotes)
+            {
+                if (current.Length > 0)
+                {
+                    result.Add(current.ToString());
+                    current.Clear();
+                }
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+        
+        if (current.Length > 0)
+        {
+            result.Add(current.ToString());
+        }
+        
+        return result;
     }
 
 
