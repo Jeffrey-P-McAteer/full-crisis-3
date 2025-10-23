@@ -4,6 +4,7 @@ using CommandLine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FullCrisis3;
 
@@ -17,7 +18,7 @@ public sealed class Program
         
         // Parse command line arguments using CommandLineParser
         Parser.Default.ParseArguments<CliArguments>(processedArgs)
-            .WithParsed(RunApplication)
+            .WithParsed(arguments => RunApplication(arguments).GetAwaiter().GetResult())
             .WithNotParsed(HandleParseError);
     }
 
@@ -50,7 +51,7 @@ public sealed class Program
         return processedArgs.ToArray();
     }
 
-    private static void RunApplication(CliArguments arguments)
+    private static async Task RunApplication(CliArguments arguments)
     {
         // Store parsed arguments globally
         GlobalArgs.Current = arguments;
@@ -67,6 +68,26 @@ public sealed class Program
         Logger.Info($"Log file: {arguments.LogFile ?? "Console only"}");
         Logger.Info($"Console attached: {attachedToConsole}");
         Logger.Info($"Launched from command line: {ConsoleManager.WasLaunchedFromCommandLine()}");
+        
+        // Handle self-upgrade if requested
+        if (arguments.SelfUpgrade)
+        {
+            Logger.Info("Self-upgrade requested...");
+            var upgradeSuccess = await SelfUpgradeManager.PerformSelfUpgradeAsync();
+            
+            if (upgradeSuccess)
+            {
+                Logger.Info("Self-upgrade completed successfully. Exiting...");
+                Environment.Exit(0);
+            }
+            else
+            {
+                Logger.LogMethod(nameof(RunApplication), "Self-upgrade failed. Continuing with current version...");
+                Environment.Exit(1);
+            }
+            
+            return; // Don't start the main application
+        }
         
         // Convert remaining args for Avalonia
         var avaloniaArgs = arguments.AvaloniaArgs?.ToArray() ?? Array.Empty<string>();

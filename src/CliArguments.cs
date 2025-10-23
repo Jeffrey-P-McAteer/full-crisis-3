@@ -43,6 +43,9 @@ public class CliArguments
     [Option("no-console", Required = false, HelpText = "Prevent console attachment even when launched from command line")]
     public bool NoConsole { get; set; }
 
+    [Option("self-upgrade", Required = false, HelpText = "Download and install the latest version from full-crisis-3.jmcateer.com")]
+    public bool SelfUpgrade { get; set; }
+
     // Allow pass-through of unknown arguments to Avalonia
     [Value(0, MetaName = "avalonia-args", HelpText = "Additional arguments passed to Avalonia framework")]
     public IEnumerable<string>? AvaloniaArgs { get; set; }
