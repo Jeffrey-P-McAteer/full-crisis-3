@@ -15,7 +15,10 @@
         SystemDecorations="Full">
 
   <Panel>
-    <Rectangle Fill="Black" />
+    <!-- Animated Background Layer (behind all content) -->
+    <vm:AnimatedBackground />
+    
+    <!-- Main Content Layer -->
     <ContentControl Content="{Binding CurrentView}" IsEnabled="{Binding !IsQuitDialogVisible}" />
     
     <Border Background="#80000000" IsVisible="{Binding IsQuitDialogVisible}">

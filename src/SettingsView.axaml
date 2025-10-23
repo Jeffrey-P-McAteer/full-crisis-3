@@ -7,7 +7,12 @@
   <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,2*,*">
     <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Text="Settings" Classes="Title" FontSize="28" Margin="0,50,0,30" />
     
-    <Border Grid.Row="1" Grid.Column="1" BorderBrush="Gray" BorderThickness="2" CornerRadius="5" Padding="30">
+    <Border Grid.Row="1" Grid.Column="1" 
+            Background="#60000000" 
+            BorderBrush="#80FFFFFF" 
+            BorderThickness="2" 
+            CornerRadius="15" 
+            Padding="30">
       <StackPanel Spacing="25">
         
         <!-- Audio Settings Section -->
