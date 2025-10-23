@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive;
 using Avalonia.Threading;
+using Avalonia.LogicalTree;
 
 namespace FullCrisis3;
 
@@ -79,7 +80,16 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
-    public string ControllerName => GamepadInput.GetControllerName();
+    public string ControllerName 
+    { 
+        get 
+        {
+            Logger.LogMethod("SettingsViewModel.ControllerName", "Getting controller name...");
+            var name = SimpleGamepadInput.GetControllerName();
+            Logger.LogMethod("SettingsViewModel.ControllerName", $"Controller name result: {name}");
+            return name;
+        }
+    }
     public string AppDataLocation => AppSettings.AppDataLocation;
 
     public ReactiveCommand<Unit, Unit>? BackCommand { get; set; }
@@ -90,6 +100,11 @@ public class SettingsViewModel : ViewModelBase
         _audioEnabled = _settings.AudioEnabled;
         _backgroundMusicEnabled = _settings.BackgroundMusicEnabled;
     }
+
+    public void RefreshControllerName()
+    {
+        this.RaisePropertyChanged(nameof(ControllerName));
+    }
 }
 
 [AutoLog]
@@ -98,7 +113,7 @@ public class MainWindowViewModel : ViewModelBase
     private readonly Stack<ViewModelBase> _viewStack = new();
     private ViewModelBase? _currentView;
     private bool _isQuitDialogVisible;
-    private GamepadInput? _gamepadInput;
+    private SimpleGamepadInput? _gamepadInput;
 
     public ViewModelBase? CurrentView
     {
@@ -127,7 +142,13 @@ public class MainWindowViewModel : ViewModelBase
         ConfirmQuitCommand = ReactiveCommand.Create(() => { Environment.Exit(0); });
         CancelQuitCommand = ReactiveCommand.Create(() => { IsQuitDialogVisible = false; });
 
-        Dispatcher.UIThread.Post(() => _gamepadInput = new GamepadInput(HandleInput), DispatcherPriority.Background);
+        Logger.LogMethod("MainWindowViewModel Constructor", "About to initialize gamepad input...");
+        Dispatcher.UIThread.Post(() => 
+        {
+            Logger.LogMethod("MainWindowViewModel Constructor", "Dispatcher callback executing - creating SimpleGamepadInput...");
+            _gamepadInput = new SimpleGamepadInput(HandleInput, OnGamepadConnectionChanged);
+            Logger.LogMethod("MainWindowViewModel Constructor", "SimpleGamepadInput created successfully");
+        }, DispatcherPriority.Background);
     }
 
     public void HandleEscapeKey()
@@ -166,6 +187,19 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private void OnGamepadConnectionChanged(bool isConnected)
+    {
+        // Update settings display when gamepad is connected/disconnected
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (CurrentView is SettingsViewModel settingsVM)
+            {
+                // Force refresh of controller name property
+                settingsVM.RefreshControllerName();
+            }
+        });
+    }
+
     private void HandleInput(string input)
     {
         Dispatcher.UIThread.Post(() =>
@@ -188,11 +222,53 @@ public class MainWindowViewModel : ViewModelBase
             }
             else
             {
-                switch (input)
+                // Try to forward to current view first
+                bool handled = false;
+                if (CurrentView != null)
                 {
-                    case "Cancel": HandleEscapeKey(); break;
+                    // Find the associated UserControl for the current view model
+                    var gamepadNavigableView = FindGamepadNavigableView();
+                    if (gamepadNavigableView != null)
+                    {
+                        handled = gamepadNavigableView.HandleGamepadInput(input);
+                    }
+                }
+
+                // If not handled by view, handle global actions
+                if (!handled)
+                {
+                    switch (input)
+                    {
+                        case "Cancel": 
+                            HandleEscapeKey(); 
+                            break;
+                    }
                 }
             }
         });
+    }
+
+    private IGamepadNavigable? FindGamepadNavigableView()
+    {
+        // This is a simple approach - in a more complex app you might want
+        // to maintain a reference to the current view control
+        return CurrentView switch
+        {
+            MainMenuViewModel => FindControlInWindow<MainMenuView>(),
+            SettingsViewModel => FindControlInWindow<SettingsView>(),
+            _ => null
+        };
+    }
+
+    private T? FindControlInWindow<T>() where T : class, IGamepadNavigable
+    {
+        // This is a workaround to find the view associated with the view model
+        // In practice, you might want to pass the view reference through the view model
+        if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var mainWindow = desktop.MainWindow as MainWindow;
+            return mainWindow?.FindLogicalDescendantOfType<T>();
+        }
+        return null;
     }
 }

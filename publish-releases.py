@@ -190,7 +190,7 @@ INDEX_HTML_TEMPLATE = """<!DOCTYPE html>
                 flex-direction: column;
             }
             .download-button {
-                width: 85%;
+                width: 80%;
             }
         }
     </style>

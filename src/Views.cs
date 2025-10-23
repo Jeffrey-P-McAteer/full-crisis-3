@@ -6,6 +6,11 @@ using System.Reactive;
 
 namespace FullCrisis3;
 
+public interface IGamepadNavigable
+{
+    bool HandleGamepadInput(string input);
+}
+
 [AutoLog]
 public partial class MainWindow : Window
 {
@@ -161,7 +166,7 @@ public partial class MainWindow : Window
 }
 
 [AutoLog]
-public partial class MainMenuView : UserControl
+public partial class MainMenuView : UserControl, IGamepadNavigable
 {
     private Button[] _buttons = Array.Empty<Button>();
     private int _selectedIndex = 0;
@@ -224,6 +229,11 @@ public partial class MainMenuView : UserControl
             _inputManager.SelectItem(3);
         }
     }
+
+    public bool HandleGamepadInput(string input)
+    {
+        return _inputManager.HandleGamepadInput(input);
+    }
 }
 
 [AutoLog]
@@ -236,7 +246,7 @@ public partial class SubMenuView : UserControl
 }
 
 [AutoLog]
-public partial class SettingsView : UserControl
+public partial class SettingsView : UserControl, IGamepadNavigable
 {
     private readonly InputManager _inputManager = new();
 
@@ -269,5 +279,10 @@ public partial class SettingsView : UserControl
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         _inputManager.HandleKeyInput(e);
+    }
+
+    public bool HandleGamepadInput(string input)
+    {
+        return _inputManager.HandleGamepadInput(input);
     }
 }
