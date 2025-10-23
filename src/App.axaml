@@ -61,7 +61,7 @@
     <!-- Main menu specific button styling -->
     <Style Selector="Button.MenuButton">
       <Setter Property="FontSize" Value="20" />
-      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Background" Value="#FF3A4D5A" />
       <Setter Property="Padding" Value="20,10" />
       <Setter Property="Margin" Value="0,8" />
       <Setter Property="HorizontalAlignment" Value="Center" />
@@ -78,7 +78,7 @@
     <!-- Back button specific styling -->
     <Style Selector="Button.BackButton">
       <Setter Property="FontSize" Value="18" />
-      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Background" Value="#FF3A4D5A" />
       <Setter Property="Padding" Value="15,8" />
       <Setter Property="MinWidth" Value="100" />
     </Style>

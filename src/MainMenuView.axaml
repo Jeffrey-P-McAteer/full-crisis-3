@@ -9,7 +9,7 @@
     
     <!-- Menu Items Container with Border -->
     <Border Grid.Row="1" 
-            Background="#40000000" 
+            Background="#FF2A3B47" 
             BorderBrush="#80FFFFFF" 
             BorderThickness="2" 
             CornerRadius="15" 
