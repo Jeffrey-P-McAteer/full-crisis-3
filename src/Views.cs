@@ -529,17 +529,30 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
         }
         else
         {
-            // Handle entering the save games list
+            // Handle loading selected save game directly from main navigation
             if ((e.Key == Key.Enter || e.Key == Key.Space) && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
             {
-                _isInSaveGamesList = true;
-                // Focus first save game
-                if (_viewModel.SavedGames.Count > 0)
+                Logger.Debug($"LoadGameView: Enter/Space pressed on SaveGamesList. SelectedSave: {_viewModel?.SelectedSave?.GameName ?? "null"}");
+                if (_viewModel?.SelectedSave != null)
                 {
-                    _saveGamesInputManager.SelectItem(0);
+                    Logger.Info($"LoadGameView: Loading save game '{_viewModel.SelectedSave.GameName}' via keyboard");
+                    // Load the currently selected save game directly
+                    _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                    e.Handled = true;
+                    return;
                 }
-                e.Handled = true;
-                return;
+                else
+                {
+                    // If no save is selected, enter sub-navigation mode
+                    _isInSaveGamesList = true;
+                    // Focus first save game
+                    if (_viewModel.SavedGames.Count > 0)
+                    {
+                        _saveGamesInputManager.SelectItem(0);
+                    }
+                    e.Handled = true;
+                    return;
+                }
             }
         }
         
@@ -581,16 +594,28 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
         }
         else
         {
-            // Handle entering the save games list
+            // Handle loading selected save game directly from main navigation
             if (input == "Confirm" && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
             {
-                _isInSaveGamesList = true;
-                // Focus first save game
-                if (_viewModel.SavedGames.Count > 0)
+                Logger.Debug($"LoadGameView: Gamepad Confirm pressed on SaveGamesList. SelectedSave: {_viewModel?.SelectedSave?.GameName ?? "null"}");
+                if (_viewModel?.SelectedSave != null)
                 {
-                    _saveGamesInputManager.SelectItem(0);
+                    Logger.Info($"LoadGameView: Loading save game '{_viewModel.SelectedSave.GameName}' via gamepad");
+                    // Load the currently selected save game directly
+                    _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                    return true;
                 }
-                return true;
+                else
+                {
+                    // If no save is selected, enter sub-navigation mode
+                    _isInSaveGamesList = true;
+                    // Focus first save game
+                    if (_viewModel.SavedGames.Count > 0)
+                    {
+                        _saveGamesInputManager.SelectItem(0);
+                    }
+                    return true;
+                }
             }
         }
         
@@ -601,7 +626,12 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
     {
         if (sender is Button button && button.Tag is SaveGameData saveData && _viewModel != null)
         {
+            Logger.Info($"LoadGameView: Loading save game '{saveData.GameName}' via button click");
             _viewModel.PlaySaveCommand.Execute(saveData);
+        }
+        else
+        {
+            Logger.Debug("LoadGameView: SaveGameButton_Click failed - sender not button, no tag data, or no viewmodel");
         }
     }
 }
