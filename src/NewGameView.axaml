@@ -21,7 +21,7 @@
         <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
           <TextBlock Grid.Row="0" Grid.Column="0" Text="Character Name:" FontSize="16" Foreground="White" 
                      VerticalAlignment="Center" Margin="0,0,15,0" />
-          <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PlayerName}" FontSize="16" 
+          <TextBox x:Name="PlayerNameTextBox" Grid.Row="0" Grid.Column="1" Text="{Binding PlayerName}" FontSize="16" 
                    Background="#FF3A4D5A" Foreground="White" BorderBrush="#FF6B7280" 
                    BorderThickness="2" CornerRadius="5" Padding="10,8" 
                    Watermark="Enter your character's name..." />
@@ -37,7 +37,7 @@
         <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto">
           <TextBlock Grid.Row="0" Grid.Column="0" Text="Story:" FontSize="16" Foreground="White" 
                      VerticalAlignment="Center" Margin="0,0,15,0" />
-          <ComboBox Grid.Row="0" Grid.Column="1" 
+          <ComboBox x:Name="StoryComboBox" Grid.Row="0" Grid.Column="1" 
                     ItemsSource="{Binding AvailableStories}" 
                     SelectedItem="{Binding SelectedStory}"
                     FontSize="16" Background="#FF3A4D5A" Foreground="White" 
@@ -62,13 +62,13 @@
         
         <!-- Action Buttons -->
         <Grid ColumnDefinitions="*,*" Margin="0,30,0,0">
-          <Button Grid.Column="0" Content="Play" 
+          <Button x:Name="PlayButton" Grid.Column="0" Content="Play" 
                   Background="#FF2E7D32" Classes="CustomButton" 
                   FontSize="18" Padding="20,12" Margin="0,0,10,0"
                   Command="{Binding PlayGameCommand}" 
                   HorizontalAlignment="Stretch" />
           
-          <Button Grid.Column="1" Content="Back" 
+          <Button x:Name="BackButton" Grid.Column="1" Content="Back" 
                   Background="#FF6B7280" Classes="CustomButton" 
                   FontSize="18" Padding="20,12" Margin="10,0,0,0"
                   Command="{Binding BackCommand}" 

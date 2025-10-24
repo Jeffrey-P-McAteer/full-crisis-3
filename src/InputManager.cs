@@ -240,6 +240,9 @@ public class InputManager
                 case CheckBox checkBox:
                     checkBox.IsChecked = !checkBox.IsChecked;
                     break;
+                case ComboBox comboBox:
+                    comboBox.IsDropDownOpen = !comboBox.IsDropDownOpen;
+                    break;
             }
         }
     }

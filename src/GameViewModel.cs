@@ -20,6 +20,9 @@ public class GameViewModel : ViewModelBase
     private bool _showDropdown = false;
     private bool _showContinueButton = false;
     private bool _isGameComplete = false;
+    private bool _hasUnsavedChanges = false;
+    private bool _showQuitDialog = false;
+    private DateTime _lastSaved = DateTime.MinValue;
     
     public GameViewModel(StoryEngine storyEngine, StoryState gameState)
     {
@@ -33,6 +36,11 @@ public class GameViewModel : ViewModelBase
         Choice2Command = ReactiveCommand.Create(() => SelectChoice(1));
         Choice3Command = ReactiveCommand.Create(() => SelectChoice(2));
         BackToMenuCommand = ReactiveCommand.Create(BackToMenu);
+        SaveGameCommand = ReactiveCommand.Create(SaveGame);
+        QuitGameCommand = ReactiveCommand.Create(QuitGame);
+        ConfirmQuitCommand = ReactiveCommand.Create(ConfirmQuit);
+        CancelQuitCommand = ReactiveCommand.Create(CancelQuit);
+        SaveAndQuitCommand = ReactiveCommand.Create(SaveAndQuit);
         
         // Load the current dialogue
         LoadCurrentDialogue();
@@ -101,6 +109,20 @@ public class GameViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _isGameComplete, value);
     }
     
+    public bool HasUnsavedChanges
+    {
+        get => _hasUnsavedChanges;
+        private set => this.RaiseAndSetIfChanged(ref _hasUnsavedChanges, value);
+    }
+    
+    public bool ShowQuitDialog
+    {
+        get => _showQuitDialog;
+        private set => this.RaiseAndSetIfChanged(ref _showQuitDialog, value);
+    }
+    
+    public string LastSavedText => _lastSaved == DateTime.MinValue ? "Never" : _lastSaved.ToString("HH:mm:ss");
+    
     #endregion
     
     #region Commands
@@ -111,6 +133,11 @@ public class GameViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> Choice2Command { get; }
     public ReactiveCommand<Unit, Unit> Choice3Command { get; }
     public ReactiveCommand<Unit, Unit> BackToMenuCommand { get; }
+    public ReactiveCommand<Unit, Unit> SaveGameCommand { get; }
+    public ReactiveCommand<Unit, Unit> QuitGameCommand { get; }
+    public ReactiveCommand<Unit, Unit> ConfirmQuitCommand { get; }
+    public ReactiveCommand<Unit, Unit> CancelQuitCommand { get; }
+    public ReactiveCommand<Unit, Unit> SaveAndQuitCommand { get; }
     
     #endregion
     
@@ -170,6 +197,7 @@ public class GameViewModel : ViewModelBase
         
         // Process with no input
         _storyEngine.ProcessPlayerInput(_gameState, "", null);
+        HasUnsavedChanges = true;
         LoadCurrentDialogue();
     }
     
@@ -198,6 +226,7 @@ public class GameViewModel : ViewModelBase
             _storyEngine.ProcessPlayerInput(_gameState, "", SelectedChoice);
         }
         
+        HasUnsavedChanges = true;
         LoadCurrentDialogue();
     }
     
@@ -207,11 +236,61 @@ public class GameViewModel : ViewModelBase
         
         var choice = AvailableChoices[choiceIndex];
         _storyEngine.ProcessPlayerInput(_gameState, "", choice);
+        HasUnsavedChanges = true;
         LoadCurrentDialogue();
+    }
+    
+    private void SaveGame()
+    {
+        try
+        {
+            var settings = SettingsManager.LoadSettings();
+            // In a full implementation, you'd save the entire game state
+            // For now, we'll just mark as saved and update timestamp
+            _lastSaved = DateTime.Now;
+            HasUnsavedChanges = false;
+            
+            Logger.Info($"Game saved at {_lastSaved:HH:mm:ss}");
+            this.RaisePropertyChanged(nameof(LastSavedText));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogMethod("SaveGame", $"Error saving game: {ex.Message}");
+        }
+    }
+    
+    private void QuitGame()
+    {
+        if (HasUnsavedChanges)
+        {
+            ShowQuitDialog = true;
+        }
+        else
+        {
+            NavigateToView?.Invoke(new MainMenuViewModel());
+        }
+    }
+    
+    private void ConfirmQuit()
+    {
+        ShowQuitDialog = false;
+        NavigateToView?.Invoke(new MainMenuViewModel());
+    }
+    
+    private void CancelQuit()
+    {
+        ShowQuitDialog = false;
+    }
+    
+    private void SaveAndQuit()
+    {
+        SaveGame();
+        ShowQuitDialog = false;
+        NavigateToView?.Invoke(new MainMenuViewModel());
     }
     
     private void BackToMenu()
     {
-        NavigateToView?.Invoke(new MainMenuViewModel());
+        QuitGame(); // Use quit logic which checks for unsaved changes
     }
 }

@@ -188,6 +188,16 @@ public class MainWindowViewModel : ViewModelBase
             {
                 gameVM.NavigateToView = NavigateToView;
             }
+            else if (vm is MainMenuViewModel mainMenuVM)
+            {
+                // Reset navigation for main menu
+                mainMenuVM.NavigateToSubMenu = NavigateToSubMenu;
+                mainMenuVM.NavigateToView = NavigateToView;
+                mainMenuVM.ShowQuitDialog = () => IsQuitDialogVisible = true;
+                
+                // Clear the view stack when returning to main menu
+                _viewStack.Clear();
+            }
         }
     }
     
@@ -282,6 +292,8 @@ public class MainWindowViewModel : ViewModelBase
         {
             MainMenuViewModel => FindControlInWindow<MainMenuView>(),
             SettingsViewModel => FindControlInWindow<SettingsView>(),
+            NewGameViewModel => FindControlInWindow<NewGameView>(),
+            GameViewModel => FindControlInWindow<GameView>(),
             _ => null
         };
     }
