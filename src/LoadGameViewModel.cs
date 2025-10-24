@@ -17,7 +17,7 @@ public class LoadGameViewModel : ViewModelBase
     public LoadGameViewModel()
     {
         // Commands
-        PlaySelectedCommand = ReactiveCommand.Create(PlaySelected, this.WhenAnyValue(x => x.SelectedSave).Select(save => save != null));
+        PlaySaveCommand = ReactiveCommand.Create<SaveGameData?>(PlaySave);
         DeleteSelectedCommand = ReactiveCommand.Create(DeleteSelected, this.WhenAnyValue(x => x.SelectedSave).Select(save => save != null));
         BackCommand = ReactiveCommand.Create(Back);
         RefreshCommand = ReactiveCommand.Create(RefreshSaveGames);
@@ -53,7 +53,7 @@ public class LoadGameViewModel : ViewModelBase
     
     #region Commands
     
-    public ReactiveCommand<Unit, Unit> PlaySelectedCommand { get; }
+    public ReactiveCommand<SaveGameData?, Unit> PlaySaveCommand { get; }
     public ReactiveCommand<Unit, Unit> DeleteSelectedCommand { get; }
     public ReactiveCommand<Unit, Unit> BackCommand { get; }
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
@@ -85,17 +85,17 @@ public class LoadGameViewModel : ViewModelBase
         }
     }
     
-    private void PlaySelected()
+    private void PlaySave(SaveGameData? saveData)
     {
-        if (SelectedSave == null) return;
+        if (saveData == null) return;
         
         try
         {
-            // Load the save game data
-            var saveData = SaveGameManager.LoadSaveGame(SelectedSave.SaveId);
-            if (saveData == null)
+            // Load the save game data from disk to get the latest state
+            var loadedSaveData = SaveGameManager.LoadSaveGame(saveData.SaveId);
+            if (loadedSaveData == null)
             {
-                Logger.LogMethod("PlaySelected", "Failed to load save game");
+                Logger.LogMethod("PlaySave", "Failed to load save game");
                 return;
             }
             
@@ -108,12 +108,12 @@ public class LoadGameViewModel : ViewModelBase
             }
             
             // Create game view model with loaded state
-            var gameViewModel = new GameViewModel(storyEngine, saveData.GameState);
+            var gameViewModel = new GameViewModel(storyEngine, loadedSaveData.GameState);
             NavigateToView?.Invoke(gameViewModel);
         }
         catch (Exception ex)
         {
-            Logger.LogMethod("PlaySelected", $"Error loading game: {ex.Message}");
+            Logger.LogMethod("PlaySave", $"Error loading game: {ex.Message}");
         }
     }
     

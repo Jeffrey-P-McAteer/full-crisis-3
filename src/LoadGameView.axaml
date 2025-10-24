@@ -42,12 +42,16 @@
           
           <ListBox.ItemTemplate>
             <DataTemplate>
-              <Border Background="#FF374151" 
+              <Button Background="#FF374151" 
                       BorderBrush="#FF6B7280" 
                       BorderThickness="1" 
                       CornerRadius="8" 
                       Padding="20" 
-                      Margin="0,5">
+                      Margin="0,5"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Stretch"
+                      Tag="{Binding}"
+                      Click="SaveGameButton_Click">
                 
                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
                   
@@ -73,7 +77,7 @@
                   
                 </Grid>
                 
-              </Border>
+              </Button>
             </DataTemplate>
           </ListBox.ItemTemplate>
           
@@ -86,10 +90,13 @@
             <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
               <Setter Property="Background" Value="Transparent" />
             </Style>
-            <Style Selector="ListBoxItem:selected Border">
+            <Style Selector="ListBoxItem:selected Button">
               <Setter Property="BorderBrush" Value="#FF4A90E2" />
               <Setter Property="BorderThickness" Value="2" />
               <Setter Property="Background" Value="#FF3A4A5C" />
+            </Style>
+            <Style Selector="ListBoxItem Button:pointerover">
+              <Setter Property="Background" Value="#FF404C5C" />
             </Style>
           </ListBox.Styles>
           
@@ -100,11 +107,6 @@
       
       <!-- Action Buttons -->
       <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" Margin="0,20,0,0">
-        
-        <Button x:Name="PlayButton" Content="Play Selected" Background="#FF4CAF50" Classes="CustomButton" 
-                FontSize="16" Padding="20,10" 
-                Command="{Binding PlaySelectedCommand}"
-                IsEnabled="{Binding SelectedSave, Converter={x:Static ObjectConverters.IsNotNull}}" />
         
         <Button x:Name="DeleteButton" Content="Delete" Background="#FFD32F2F" Classes="CustomButton" 
                 FontSize="16" Padding="20,10" 

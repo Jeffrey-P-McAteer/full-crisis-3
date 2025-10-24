@@ -358,7 +358,6 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
         var controls = new Control[]
         {
             this.FindControl<ListBox>("SaveGamesList") ?? new ListBox(),
-            this.FindControl<Button>("PlayButton")!,
             this.FindControl<Button>("DeleteButton")!,
             this.FindControl<Button>("RefreshButton")!,
             this.FindControl<Button>("BackButton")!
@@ -390,6 +389,18 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
             return;
         }
         
+        // Handle Enter key for loading selected save game
+        if (e.Key == Key.Enter && _viewModel?.SelectedSave != null)
+        {
+            var saveGamesList = this.FindControl<ListBox>("SaveGamesList");
+            if (saveGamesList?.IsFocused == true)
+            {
+                _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                e.Handled = true;
+                return;
+            }
+        }
+        
         _inputManager.HandleKeyInput(e);
     }
     
@@ -401,6 +412,25 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
     
     public bool HandleGamepadInput(string input)
     {
+        // Handle A button (Confirm) for loading selected save game
+        if (input == "Confirm" && _viewModel?.SelectedSave != null)
+        {
+            var saveGamesList = this.FindControl<ListBox>("SaveGamesList");
+            if (saveGamesList?.IsFocused == true)
+            {
+                _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                return true;
+            }
+        }
+        
         return _inputManager.HandleGamepadInput(input);
+    }
+    
+    private void SaveGameButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (sender is Button button && button.Tag is SaveGameData saveData && _viewModel != null)
+        {
+            _viewModel.PlaySaveCommand.Execute(saveData);
+        }
     }
 }

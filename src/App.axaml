@@ -26,6 +26,9 @@
     <DataTemplate DataType="vm:GameViewModel">
       <views:GameView />
     </DataTemplate>
+    <DataTemplate DataType="vm:LoadGameViewModel">
+      <views:LoadGameView />
+    </DataTemplate>
   </Application.DataTemplates>
 
   <Application.Styles>
