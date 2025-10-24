@@ -509,7 +509,25 @@ public class InputManager
         }
         else
         {
-            Logger.Debug("SelectUp: no target item found");
+            Logger.Debug("SelectUp: no target item found, trying wraparound to bottom row");
+            // If no item found above, wrap around to the bottom row
+            var maxRow = _selectableItems.Where(item => item.IsEnabled).Max(item => item.GridRow);
+            var bottomRowCandidates = _selectableItems
+                .Where(item => item.IsEnabled && item.GridRow == maxRow)
+                .OrderBy(item => Math.Abs(item.GridColumn - currentColumn))
+                .ToList();
+            
+            var wraparoundTarget = bottomRowCandidates.FirstOrDefault();
+            if (wraparoundTarget != null)
+            {
+                Logger.Debug($"SelectUp: wrapping around to row={wraparoundTarget.GridRow}, col={wraparoundTarget.GridColumn}");
+                var targetIndex = _selectableItems.IndexOf(wraparoundTarget);
+                SelectItem(targetIndex);
+            }
+            else
+            {
+                Logger.Debug("SelectUp: no wraparound target found either");
+            }
         }
     }
     
@@ -535,6 +553,22 @@ public class InputManager
         {
             var targetIndex = _selectableItems.IndexOf(targetItem);
             SelectItem(targetIndex);
+        }
+        else
+        {
+            // If no item found below, wrap around to the top row
+            var minRow = _selectableItems.Where(item => item.IsEnabled).Min(item => item.GridRow);
+            var topRowCandidates = _selectableItems
+                .Where(item => item.IsEnabled && item.GridRow == minRow)
+                .OrderBy(item => Math.Abs(item.GridColumn - currentColumn))
+                .ToList();
+            
+            var wraparoundTarget = topRowCandidates.FirstOrDefault();
+            if (wraparoundTarget != null)
+            {
+                var targetIndex = _selectableItems.IndexOf(wraparoundTarget);
+                SelectItem(targetIndex);
+            }
         }
     }
     

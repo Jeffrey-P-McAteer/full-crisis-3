@@ -130,8 +130,17 @@ public class LoadGameViewModel : ViewModelBase
             var gameViewModel = new GameViewModel(storyEngine, loadedSaveData.GameState);
             Logger.Info($"PlaySave: GameViewModel created successfully, navigating to game view");
             
-            NavigateToView?.Invoke(gameViewModel);
-            Logger.Info($"PlaySave: Successfully loaded and started save game '{saveData.GameName}'");
+            Logger.Debug($"PlaySave: NavigateToView callback is {(NavigateToView != null ? "available" : "null")}");
+            if (NavigateToView != null)
+            {
+                Logger.Debug($"PlaySave: Invoking NavigateToView with GameViewModel");
+                NavigateToView.Invoke(gameViewModel);
+                Logger.Info($"PlaySave: Successfully loaded and started save game '{saveData.GameName}'");
+            }
+            else
+            {
+                Logger.Info($"PlaySave: ERROR - NavigateToView callback is null, cannot navigate to game!");
+            }
         }
         catch (Exception ex)
         {
