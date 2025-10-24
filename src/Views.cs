@@ -247,6 +247,7 @@ public partial class MainMenuView : UserControl, IGamepadNavigable
 
         // Setup InputManager for main menu
         _inputManager.ClearSelectables();
+        _inputManager.SetGridNavigation(true);
         
         for (int i = 0; i < _buttons.Length; i++)
         {
@@ -256,6 +257,8 @@ public partial class MainMenuView : UserControl, IGamepadNavigable
             _inputManager.RegisterSelectable(
                 button, 
                 tabIndex: i,
+                gridRow: i,
+                gridColumn: 0,
                 onSelected: item => _selectedIndex = index
             );
         }
@@ -314,10 +317,12 @@ public partial class SettingsView : UserControl, IGamepadNavigable
         };
 
         _inputManager.ClearSelectables();
+        _inputManager.SetGridNavigation(true);
         
+        // Settings controls in a vertical layout
         for (int i = 0; i < controls.Length; i++)
         {
-            _inputManager.RegisterSelectable(controls[i], tabIndex: i);
+            _inputManager.RegisterSelectable(controls[i], tabIndex: i, gridRow: i, gridColumn: 0);
         }
 
         if (controls.Length > 0) _inputManager.SelectItem(0);
@@ -338,7 +343,10 @@ public partial class SettingsView : UserControl, IGamepadNavigable
 public partial class LoadGameView : UserControl, IGamepadNavigable
 {
     private readonly InputManager _inputManager = new();
+    private readonly InputManager _saveGamesInputManager = new();
     private LoadGameViewModel? _viewModel;
+    private ListBox? _saveGamesList;
+    private bool _isInSaveGamesList = false;
     
     public LoadGameView()
     {
@@ -351,29 +359,113 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
     private void OnDataContextChanged(object? sender, EventArgs e)
     {
         _viewModel = DataContext as LoadGameViewModel;
+        if (_viewModel != null)
+        {
+            _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            SetupSaveGamesNavigation();
+        }
+    }
+    
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(LoadGameViewModel.SavedGames) || 
+            e.PropertyName == nameof(LoadGameViewModel.HasSaveGames))
+        {
+            SetupSaveGamesNavigation();
+        }
     }
     
     private void SetupControls()
     {
-        var controls = new Control[]
-        {
-            this.FindControl<ListBox>("SaveGamesList") ?? new ListBox(),
-            this.FindControl<Button>("DeleteButton")!,
-            this.FindControl<Button>("RefreshButton")!,
-            this.FindControl<Button>("BackButton")!
-        };
+        _saveGamesList = this.FindControl<ListBox>("SaveGamesList");
         
         _inputManager.ClearSelectables();
+        _inputManager.SetGridNavigation(true);
         
-        for (int i = 0; i < controls.Length; i++)
+        // Register save games list as a navigable area
+        if (_saveGamesList != null)
         {
-            if (controls[i] != null)
-            {
-                _inputManager.RegisterSelectable(controls[i], tabIndex: i);
-            }
+            _inputManager.RegisterSelectable(_saveGamesList, tabIndex: 0, gridRow: 0, gridColumn: 0);
         }
         
-        if (controls.Length > 0) _inputManager.SelectItem(0);
+        // Register action buttons in a row below
+        var deleteButton = this.FindControl<Button>("DeleteButton");
+        var refreshButton = this.FindControl<Button>("RefreshButton");
+        var backButton = this.FindControl<Button>("BackButton");
+        
+        if (deleteButton != null)
+            _inputManager.RegisterSelectable(deleteButton, tabIndex: 1, gridRow: 1, gridColumn: 0);
+        if (refreshButton != null)
+            _inputManager.RegisterSelectable(refreshButton, tabIndex: 2, gridRow: 1, gridColumn: 1);
+        if (backButton != null)
+            _inputManager.RegisterSelectable(backButton, tabIndex: 3, gridRow: 1, gridColumn: 2);
+        
+        // Start with save games list selected
+        _inputManager.SelectItem(0);
+        SetupSaveGamesNavigation();
+    }
+    
+    private void SetupSaveGamesNavigation()
+    {
+        if (_saveGamesList == null || _viewModel?.SavedGames == null) return;
+        
+        _saveGamesInputManager.ClearSelectables();
+        _saveGamesInputManager.SetGridNavigation(true);
+        
+        // Wait for ListBox to generate its containers
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            var containers = new System.Collections.Generic.List<Control>();
+            
+            for (int i = 0; i < _viewModel.SavedGames.Count; i++)
+            {
+                var container = _saveGamesList.ContainerFromIndex(i);
+                if (container is ListBoxItem listBoxItem)
+                {
+                    var button = listBoxItem.FindLogicalDescendantOfType<Button>();
+                    if (button != null)
+                    {
+                        containers.Add(button);
+                    }
+                }
+            }
+            
+            for (int i = 0; i < containers.Count; i++)
+            {
+                var index = i;
+                var control = containers[i];
+                
+                _saveGamesInputManager.RegisterSelectable(
+                    control, 
+                    tabIndex: i,
+                    gridRow: i,
+                    gridColumn: 0,
+                    onSelected: item => 
+                    {
+                        // Update the ListBox selection to match the focused save game
+                        if (index < _viewModel.SavedGames.Count)
+                        {
+                            _viewModel.SelectedSave = _viewModel.SavedGames[index];
+                            _saveGamesList.SelectedIndex = index;
+                        }
+                    }
+                );
+            }
+            
+            // Select first save game if available
+            if (containers.Count > 0 && _viewModel.SelectedSave != null)
+            {
+                var selectedIndex = _viewModel.SavedGames.IndexOf(_viewModel.SelectedSave);
+                if (selectedIndex >= 0)
+                {
+                    _saveGamesInputManager.SelectItem(selectedIndex);
+                }
+                else
+                {
+                    _saveGamesInputManager.SelectItem(0);
+                }
+            }
+        }, Avalonia.Threading.DispatcherPriority.Background);
     }
     
     private void OnKeyDown(object? sender, KeyEventArgs e)
@@ -389,13 +481,63 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
             return;
         }
         
-        // Handle Enter key for loading selected save game
-        if (e.Key == Key.Enter && _viewModel?.SelectedSave != null)
+        // If we're in the save games list, handle navigation within it
+        if (_isInSaveGamesList)
         {
-            var saveGamesList = this.FindControl<ListBox>("SaveGamesList");
-            if (saveGamesList?.IsFocused == true)
+            switch (e.Key)
             {
-                _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                case Key.Up or Key.W:
+                    _saveGamesInputManager.HandleKeyInput(e);
+                    return;
+                    
+                case Key.Down or Key.S:
+                    _saveGamesInputManager.HandleKeyInput(e);
+                    return;
+                    
+                case Key.Enter or Key.Space:
+                    if (_viewModel?.SelectedSave != null)
+                    {
+                        _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                        e.Handled = true;
+                        return;
+                    }
+                    break;
+                    
+                case Key.Tab:
+                    if (e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                    {
+                        // Exit save games list and go to previous control
+                        _isInSaveGamesList = false;
+                        _inputManager.SelectPrevious();
+                    }
+                    else
+                    {
+                        // Exit save games list and go to next control
+                        _isInSaveGamesList = false;
+                        _inputManager.SelectNext();
+                    }
+                    e.Handled = true;
+                    return;
+                    
+                case Key.Escape:
+                    // Exit save games list navigation
+                    _isInSaveGamesList = false;
+                    _inputManager.SelectItem(0); // Focus back to the ListBox container
+                    e.Handled = true;
+                    return;
+            }
+        }
+        else
+        {
+            // Handle entering the save games list
+            if ((e.Key == Key.Enter || e.Key == Key.Space) && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
+            {
+                _isInSaveGamesList = true;
+                // Focus first save game
+                if (_viewModel.SavedGames.Count > 0)
+                {
+                    _saveGamesInputManager.SelectItem(0);
+                }
                 e.Handled = true;
                 return;
             }
@@ -412,13 +554,42 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
     
     public bool HandleGamepadInput(string input)
     {
-        // Handle A button (Confirm) for loading selected save game
-        if (input == "Confirm" && _viewModel?.SelectedSave != null)
+        // If we're in the save games list, handle navigation within it
+        if (_isInSaveGamesList)
         {
-            var saveGamesList = this.FindControl<ListBox>("SaveGamesList");
-            if (saveGamesList?.IsFocused == true)
+            switch (input)
             {
-                _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                case "Up":
+                case "Down":
+                    _saveGamesInputManager.HandleGamepadInput(input);
+                    return true;
+                    
+                case "Confirm":
+                    if (_viewModel?.SelectedSave != null)
+                    {
+                        _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                        return true;
+                    }
+                    break;
+                    
+                case "Cancel":
+                    // Exit save games list navigation
+                    _isInSaveGamesList = false;
+                    _inputManager.SelectItem(0); // Focus back to the ListBox container
+                    return true;
+            }
+        }
+        else
+        {
+            // Handle entering the save games list
+            if (input == "Confirm" && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
+            {
+                _isInSaveGamesList = true;
+                // Focus first save game
+                if (_viewModel.SavedGames.Count > 0)
+                {
+                    _saveGamesInputManager.SelectItem(0);
+                }
                 return true;
             }
         }

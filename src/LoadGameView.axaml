@@ -51,7 +51,9 @@
                       HorizontalAlignment="Stretch"
                       HorizontalContentAlignment="Stretch"
                       Tag="{Binding}"
-                      Click="SaveGameButton_Click">
+                      Click="SaveGameButton_Click"
+                      Classes="CustomButton SaveGameButton"
+                      Focusable="True">
                 
                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
                   

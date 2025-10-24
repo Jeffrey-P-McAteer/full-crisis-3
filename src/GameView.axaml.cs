@@ -115,12 +115,22 @@ public partial class GameView : UserControl, IGamepadNavigable
     private void RegisterControls(Control[] controls, InputManager inputManager)
     {
         inputManager.ClearSelectables();
+        inputManager.SetGridNavigation(true);
         
+        // Arrange controls in a grid layout for better navigation
         for (int i = 0; i < controls.Length; i++)
         {
             if (controls[i] != null)
             {
-                inputManager.RegisterSelectable(controls[i], tabIndex: i);
+                var gridRow = i < 2 ? 0 : (i - 2) / 3 + 1; // Save/Quit in row 0, others flow into rows
+                var gridColumn = i < 2 ? i : (i - 2) % 3; // Save/Quit spread in row 0, choices in columns
+                
+                inputManager.RegisterSelectable(
+                    controls[i], 
+                    tabIndex: i, 
+                    gridRow: gridRow, 
+                    gridColumn: gridColumn
+                );
             }
         }
         

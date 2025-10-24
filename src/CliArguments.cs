@@ -13,6 +13,9 @@ public class CliArguments
     [Option('l', "log-file", Required = false, HelpText = "Path to log file for debugging output")]
     public string? LogFile { get; set; }
 
+    [Option("verbosity", Required = false, HelpText = "Set verbosity level (0-3, or use -v/-vv/-vvv)", Default = 0)]
+    public int VerbosityLevel { get; set; }
+
 
     [Option("windowed", Required = false, HelpText = "Force windowed mode")]
     public bool Windowed { get; set; }

@@ -160,6 +160,21 @@
       <Setter Property="MinWidth" Value="100" />
     </Style>
     
+    <!-- Save game button specific styling -->
+    <Style Selector="Button.SaveGameButton">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+    
+    <!-- Save game button hover effect -->
+    <Style Selector="Button.SaveGameButton:pointerover">
+      <Setter Property="Background" Value="#FF404C5C" />
+    </Style>
+    <Style Selector="Button.SaveGameButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FF404C5C" />
+    </Style>
+    
     <!-- CheckBox focus styling -->
     <Style Selector="CheckBox:focus">
       <Setter Property="BorderBrush" Value="Yellow" />

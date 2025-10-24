@@ -29,6 +29,7 @@ public partial class NewGameView : UserControl, IGamepadNavigable
         };
         
         _inputManager.ClearSelectables();
+        _inputManager.SetGridNavigation(true);
         
         for (int i = 0; i < _controls.Length; i++)
         {
@@ -36,6 +37,8 @@ public partial class NewGameView : UserControl, IGamepadNavigable
             _inputManager.RegisterSelectable(
                 _controls[i],
                 tabIndex: i,
+                gridRow: i,
+                gridColumn: 0,
                 onSelected: item => _selectedIndex = index
             );
         }

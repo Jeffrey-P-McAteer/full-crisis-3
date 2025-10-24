@@ -118,24 +118,55 @@ public static class SaveGameManager
     /// </summary>
     public static SaveGameData? LoadSaveGame(string saveId)
     {
+        Logger.Debug($"LoadSaveGame: Attempting to load save game with ID: {saveId}");
+        
         try
         {
             var saveFilePath = Path.Combine(SaveDirectory, $"{saveId}.json");
+            Logger.Trace($"LoadSaveGame: Looking for save file at: {saveFilePath}");
+            
             if (!File.Exists(saveFilePath))
             {
-                Logger.LogMethod("LoadSaveGame", $"Save file not found: {saveFilePath}");
+                Logger.Info($"LoadSaveGame: Save file not found: {saveFilePath}");
+                Logger.Debug($"LoadSaveGame: Available files in save directory: {string.Join(", ", Directory.GetFiles(SaveDirectory))}");
                 return null;
             }
             
+            Logger.Debug($"LoadSaveGame: Reading save file contents...");
             var json = File.ReadAllText(saveFilePath);
+            Logger.Trace($"LoadSaveGame: Save file content length: {json.Length} characters");
+            
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                Logger.Info($"LoadSaveGame: Save file is empty: {saveFilePath}");
+                return null;
+            }
+            
+            Logger.Debug($"LoadSaveGame: Deserializing save data from JSON...");
             var saveData = JsonSerializer.Deserialize<SaveGameData>(json);
             
-            Logger.Info($"Game loaded: {saveFilePath}");
+            if (saveData == null)
+            {
+                Logger.Info($"LoadSaveGame: Failed to deserialize save data - result was null");
+                return null;
+            }
+            
+            Logger.Info($"LoadSaveGame: Successfully loaded save game '{saveData.GameName}' from {saveFilePath}");
+            Logger.Debug($"LoadSaveGame: Loaded save data - Player: {saveData.PlayerName}, Game: {saveData.GameName}, Saved: {saveData.SavedAt}");
+            Logger.Trace($"LoadSaveGame: Game state has {(saveData.GameState?.Variables?.Count ?? 0)} variable entries");
+            
             return saveData;
+        }
+        catch (JsonException ex)
+        {
+            Logger.Info($"LoadSaveGame: JSON parsing error for save game {saveId}: {ex.Message}");
+            Logger.Debug($"LoadSaveGame: JSON exception details: {ex}");
+            return null;
         }
         catch (Exception ex)
         {
-            Logger.LogMethod("LoadSaveGame", $"Error loading save game {saveId}: {ex.Message}");
+            Logger.Info($"LoadSaveGame: Error loading save game {saveId}: {ex.Message}");
+            Logger.Debug($"LoadSaveGame: Exception details: {ex}");
             return null;
         }
     }

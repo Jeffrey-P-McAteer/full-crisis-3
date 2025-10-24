@@ -23,6 +23,8 @@ public class InputManager
     {
         public Control Control { get; set; } = null!;
         public int TabIndex { get; set; }
+        public int GridRow { get; set; } = 0;
+        public int GridColumn { get; set; } = 0;
         public bool IsEnabled => Control.IsEnabled && Control.IsVisible;
         public Action<SelectableItem>? OnSelected { get; set; }
         public Action<SelectableItem>? OnActivated { get; set; }
@@ -32,6 +34,7 @@ public class InputManager
     private int _selectedIndex = 0;
     private InputType _lastInputType = InputType.Keyboard;
     private DateTime _lastInputTime = DateTime.MinValue;
+    private bool _useGridNavigation = false;
 
     public event Action<SelectableItem>? SelectionChanged;
     public event Action<InputType>? InputTypeChanged;
@@ -43,12 +46,14 @@ public class InputManager
 
     public InputType LastInputType => _lastInputType;
 
-    public void RegisterSelectable(Control control, int tabIndex = 0, Action<SelectableItem>? onSelected = null, Action<SelectableItem>? onActivated = null)
+    public void RegisterSelectable(Control control, int tabIndex = 0, int gridRow = 0, int gridColumn = 0, Action<SelectableItem>? onSelected = null, Action<SelectableItem>? onActivated = null)
     {
         var item = new SelectableItem
         {
             Control = control,
             TabIndex = tabIndex,
+            GridRow = gridRow,
+            GridColumn = gridColumn,
             OnSelected = onSelected,
             OnActivated = onActivated
         };
@@ -92,12 +97,24 @@ public class InputManager
         _selectableItems.Clear();
         _selectedIndex = 0;
     }
+    
+    public void SetGridNavigation(bool useGridNavigation)
+    {
+        _useGridNavigation = useGridNavigation;
+    }
 
     public bool HandleKeyInput(KeyEventArgs e)
     {
         if (_selectableItems.Count == 0) return false;
 
         SetInputType(InputType.Keyboard);
+        
+        var selectedItem = SelectedItem;
+        if (selectedItem?.Control is ComboBox comboBox)
+        {
+            var handled = HandleComboBoxKeyInput(comboBox, e);
+            if (handled) return true;
+        }
 
         switch (e.Key)
         {
@@ -114,22 +131,50 @@ public class InputManager
                 return true;
 
             case Key.Up or Key.W:
-                SelectPrevious();
+                if (_useGridNavigation)
+                {
+                    SelectUp();
+                }
+                else
+                {
+                    SelectPrevious();
+                }
                 e.Handled = true;
                 return true;
 
             case Key.Down or Key.S:
-                SelectNext();
+                if (_useGridNavigation)
+                {
+                    SelectDown();
+                }
+                else
+                {
+                    SelectNext();
+                }
                 e.Handled = true;
                 return true;
 
             case Key.Left or Key.A:
-                SelectPrevious();
+                if (_useGridNavigation)
+                {
+                    SelectLeft();
+                }
+                else
+                {
+                    SelectPrevious();
+                }
                 e.Handled = true;
                 return true;
 
             case Key.Right or Key.D:
-                SelectNext();
+                if (_useGridNavigation)
+                {
+                    SelectRight();
+                }
+                else
+                {
+                    SelectNext();
+                }
                 e.Handled = true;
                 return true;
 
@@ -141,23 +186,115 @@ public class InputManager
 
         return false;
     }
+    
+    private bool HandleComboBoxKeyInput(ComboBox comboBox, KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Enter or Key.Space:
+                // Toggle dropdown open/close
+                comboBox.IsDropDownOpen = !comboBox.IsDropDownOpen;
+                e.Handled = true;
+                return true;
+                
+            case Key.Escape:
+                // Close dropdown without changing selection
+                if (comboBox.IsDropDownOpen)
+                {
+                    comboBox.IsDropDownOpen = false;
+                    e.Handled = true;
+                    return true;
+                }
+                break;
+                
+            case Key.Up or Key.W:
+                if (comboBox.IsDropDownOpen)
+                {
+                    // Navigate up in dropdown
+                    var currentIndex = comboBox.SelectedIndex;
+                    if (currentIndex > 0)
+                    {
+                        comboBox.SelectedIndex = currentIndex - 1;
+                    }
+                    e.Handled = true;
+                    return true;
+                }
+                break;
+                
+            case Key.Down or Key.S:
+                if (comboBox.IsDropDownOpen)
+                {
+                    // Navigate down in dropdown
+                    var currentIndex = comboBox.SelectedIndex;
+                    if (currentIndex < comboBox.ItemCount - 1)
+                    {
+                        comboBox.SelectedIndex = currentIndex + 1;
+                    }
+                    e.Handled = true;
+                    return true;
+                }
+                break;
+        }
+        
+        return false;
+    }
 
     public bool HandleGamepadInput(string input)
     {
         if (_selectableItems.Count == 0) return false;
 
         SetInputType(InputType.Gamepad);
+        
+        var selectedItem = SelectedItem;
+        if (selectedItem?.Control is ComboBox comboBox)
+        {
+            return HandleComboBoxGamepadInput(comboBox, input);
+        }
 
         switch (input)
         {
             case "Up":
+                if (_useGridNavigation)
+                {
+                    SelectUp();
+                }
+                else
+                {
+                    SelectPrevious();
+                }
+                return true;
+                
             case "Left":
-                SelectPrevious();
+                if (_useGridNavigation)
+                {
+                    SelectLeft();
+                }
+                else
+                {
+                    SelectPrevious();
+                }
                 return true;
 
             case "Down":
+                if (_useGridNavigation)
+                {
+                    SelectDown();
+                }
+                else
+                {
+                    SelectNext();
+                }
+                return true;
+
             case "Right":
-                SelectNext();
+                if (_useGridNavigation)
+                {
+                    SelectRight();
+                }
+                else
+                {
+                    SelectNext();
+                }
                 return true;
 
             case "Confirm":
@@ -165,6 +302,77 @@ public class InputManager
                 return true;
         }
 
+        return false;
+    }
+    
+    private bool HandleComboBoxGamepadInput(ComboBox comboBox, string input)
+    {
+        switch (input)
+        {
+            case "Confirm":
+                // Toggle dropdown open/close
+                comboBox.IsDropDownOpen = !comboBox.IsDropDownOpen;
+                return true;
+                
+            case "Cancel":
+                // Close dropdown without changing selection
+                if (comboBox.IsDropDownOpen)
+                {
+                    comboBox.IsDropDownOpen = false;
+                    return true;
+                }
+                break;
+                
+            case "Up":
+                if (comboBox.IsDropDownOpen)
+                {
+                    // Navigate up in dropdown
+                    var currentIndex = comboBox.SelectedIndex;
+                    if (currentIndex > 0)
+                    {
+                        comboBox.SelectedIndex = currentIndex - 1;
+                    }
+                    return true;
+                }
+                else
+                {
+                    // Navigate to previous control
+                    SelectUp();
+                    return true;
+                }
+                
+            case "Down":
+                if (comboBox.IsDropDownOpen)
+                {
+                    // Navigate down in dropdown
+                    var currentIndex = comboBox.SelectedIndex;
+                    if (currentIndex < comboBox.ItemCount - 1)
+                    {
+                        comboBox.SelectedIndex = currentIndex + 1;
+                    }
+                    return true;
+                }
+                else
+                {
+                    // Navigate to next control
+                    SelectDown();
+                    return true;
+                }
+                
+            case "Left":
+            case "Right":
+                if (!comboBox.IsDropDownOpen)
+                {
+                    // Navigate to adjacent controls when dropdown is closed
+                    if (input == "Left")
+                        SelectLeft();
+                    else
+                        SelectRight();
+                    return true;
+                }
+                break;
+        }
+        
         return false;
     }
 
@@ -264,6 +472,136 @@ public class InputManager
         if (_selectableItems.Count > 0 && _selectedIndex < _selectableItems.Count)
         {
             SelectItem(_selectedIndex);
+        }
+    }
+    
+    private void SelectUp()
+    {
+        if (_selectableItems.Count == 0) return;
+        
+        var currentItem = SelectedItem;
+        if (currentItem == null) return;
+        
+        var currentRow = currentItem.GridRow;
+        var currentColumn = currentItem.GridColumn;
+        
+        // Find item in row above with same or closest column
+        var candidateItems = _selectableItems
+            .Where(item => item.IsEnabled && item.GridRow < currentRow)
+            .OrderByDescending(item => item.GridRow)
+            .ThenBy(item => Math.Abs(item.GridColumn - currentColumn))
+            .ToList();
+        
+        var targetItem = candidateItems.FirstOrDefault();
+        if (targetItem != null)
+        {
+            var targetIndex = _selectableItems.IndexOf(targetItem);
+            SelectItem(targetIndex);
+        }
+    }
+    
+    private void SelectDown()
+    {
+        if (_selectableItems.Count == 0) return;
+        
+        var currentItem = SelectedItem;
+        if (currentItem == null) return;
+        
+        var currentRow = currentItem.GridRow;
+        var currentColumn = currentItem.GridColumn;
+        
+        // Find item in row below with same or closest column
+        var candidateItems = _selectableItems
+            .Where(item => item.IsEnabled && item.GridRow > currentRow)
+            .OrderBy(item => item.GridRow)
+            .ThenBy(item => Math.Abs(item.GridColumn - currentColumn))
+            .ToList();
+        
+        var targetItem = candidateItems.FirstOrDefault();
+        if (targetItem != null)
+        {
+            var targetIndex = _selectableItems.IndexOf(targetItem);
+            SelectItem(targetIndex);
+        }
+    }
+    
+    private void SelectLeft()
+    {
+        if (_selectableItems.Count == 0) return;
+        
+        var currentItem = SelectedItem;
+        if (currentItem == null) return;
+        
+        var currentRow = currentItem.GridRow;
+        var currentColumn = currentItem.GridColumn;
+        
+        // Find item in same row to the left
+        var candidateItems = _selectableItems
+            .Where(item => item.IsEnabled && item.GridRow == currentRow && item.GridColumn < currentColumn)
+            .OrderByDescending(item => item.GridColumn)
+            .ToList();
+        
+        var targetItem = candidateItems.FirstOrDefault();
+        if (targetItem != null)
+        {
+            var targetIndex = _selectableItems.IndexOf(targetItem);
+            SelectItem(targetIndex);
+        }
+        else
+        {
+            // If no item to the left in same row, try previous row's rightmost item
+            var prevRowItems = _selectableItems
+                .Where(item => item.IsEnabled && item.GridRow < currentRow)
+                .OrderByDescending(item => item.GridRow)
+                .ThenByDescending(item => item.GridColumn)
+                .ToList();
+            
+            targetItem = prevRowItems.FirstOrDefault();
+            if (targetItem != null)
+            {
+                var targetIndex = _selectableItems.IndexOf(targetItem);
+                SelectItem(targetIndex);
+            }
+        }
+    }
+    
+    private void SelectRight()
+    {
+        if (_selectableItems.Count == 0) return;
+        
+        var currentItem = SelectedItem;
+        if (currentItem == null) return;
+        
+        var currentRow = currentItem.GridRow;
+        var currentColumn = currentItem.GridColumn;
+        
+        // Find item in same row to the right
+        var candidateItems = _selectableItems
+            .Where(item => item.IsEnabled && item.GridRow == currentRow && item.GridColumn > currentColumn)
+            .OrderBy(item => item.GridColumn)
+            .ToList();
+        
+        var targetItem = candidateItems.FirstOrDefault();
+        if (targetItem != null)
+        {
+            var targetIndex = _selectableItems.IndexOf(targetItem);
+            SelectItem(targetIndex);
+        }
+        else
+        {
+            // If no item to the right in same row, try next row's leftmost item
+            var nextRowItems = _selectableItems
+                .Where(item => item.IsEnabled && item.GridRow > currentRow)
+                .OrderBy(item => item.GridRow)
+                .ThenBy(item => item.GridColumn)
+                .ToList();
+            
+            targetItem = nextRowItems.FirstOrDefault();
+            if (targetItem != null)
+            {
+                var targetIndex = _selectableItems.IndexOf(targetItem);
+                SelectItem(targetIndex);
+            }
         }
     }
 }

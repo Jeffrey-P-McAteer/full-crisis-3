@@ -16,9 +16,17 @@ public sealed class Program
         // Combine command line args with environment variable args
         var allArgs = CombineArgsWithEnvironment(args);
         
+        // Pre-process verbosity flags before CommandLineParser
+        var (processedArgs, verbosityFromFlags) = PreprocessVerbosityFlags(allArgs);
+        
         // Parse command line arguments using CommandLineParser
-        Parser.Default.ParseArguments<CliArguments>(allArgs)
-            .WithParsed(arguments => RunApplication(arguments).GetAwaiter().GetResult())
+        Parser.Default.ParseArguments<CliArguments>(processedArgs)
+            .WithParsed(arguments => 
+            {
+                // Apply verbosity from manual flag counting
+                arguments.VerbosityLevel = Math.Max(arguments.VerbosityLevel, verbosityFromFlags);
+                RunApplication(arguments).GetAwaiter().GetResult();
+            })
             .WithNotParsed(HandleParseError);
     }
 
@@ -81,6 +89,44 @@ public sealed class Program
         
         return result;
     }
+    
+    private static (string[], int) PreprocessVerbosityFlags(string[] args)
+    {
+        var processedArgs = new List<string>();
+        int verbosityCount = 0;
+        
+        foreach (var arg in args)
+        {
+            if (arg == "-v")
+            {
+                verbosityCount++;
+                // Don't add to processed args - we'll handle this manually
+            }
+            else if (arg == "-vv")
+            {
+                verbosityCount += 2;
+                // Don't add to processed args
+            }
+            else if (arg == "-vvv")
+            {
+                verbosityCount += 3;
+                // Don't add to processed args
+            }
+            else if (arg.StartsWith("-v") && arg.Length > 2 && arg.All(c => c == 'v' || c == '-'))
+            {
+                // Handle cases like -vvvv
+                verbosityCount += arg.Count(c => c == 'v');
+                // Don't add to processed args
+            }
+            else
+            {
+                // Keep all other arguments
+                processedArgs.Add(arg);
+            }
+        }
+        
+        return (processedArgs.ToArray(), verbosityCount);
+    }
 
 
     private static async Task RunApplication(CliArguments arguments)
@@ -88,15 +134,19 @@ public sealed class Program
         // Store parsed arguments globally
         GlobalArgs.Current = arguments;
         
+        // Verbosity level is already calculated and set
+        var verbosityLevel = arguments.VerbosityLevel;
+        
         // Attach to console based on launch method
         var attachedToConsole = ConsoleManager.AttachToParentConsoleIfNeeded();
         
-        // Initialize logger with parsed arguments
-        Logger.Initialize(arguments.LogFile, 1); // Default verbosity level
+        // Initialize logger with parsed arguments and calculated verbosity
+        Logger.Initialize(arguments.LogFile, verbosityLevel);
         Logger.LogMethod(nameof(Main), $"Arguments: {string.Join(" ", Environment.GetCommandLineArgs())}");
         Logger.Info($"Log file: {arguments.LogFile ?? "Console only"}");
         Logger.Info($"Console attached: {attachedToConsole}");
         Logger.Info($"Launched from command line: {ConsoleManager.WasLaunchedFromCommandLine()}");
+        Logger.Info($"Verbosity level: {verbosityLevel}");
         
         // Handle self-upgrade if requested
         if (arguments.SelfUpgrade)

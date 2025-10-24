@@ -87,33 +87,57 @@ public class LoadGameViewModel : ViewModelBase
     
     private void PlaySave(SaveGameData? saveData)
     {
-        if (saveData == null) return;
+        if (saveData == null)
+        {
+            Logger.Info("PlaySave: No save data provided");
+            return;
+        }
+        
+        Logger.Info($"PlaySave: Attempting to load save game '{saveData.GameName}' (ID: {saveData.SaveId})");
+        Logger.Debug($"PlaySave: Save game details - Player: {saveData.PlayerName}, Saved: {saveData.SavedAt}");
         
         try
         {
             // Load the save game data from disk to get the latest state
+            Logger.Debug($"PlaySave: Loading save game from disk...");
             var loadedSaveData = SaveGameManager.LoadSaveGame(saveData.SaveId);
             if (loadedSaveData == null)
             {
-                Logger.LogMethod("PlaySave", "Failed to load save game");
+                Logger.Info($"PlaySave: Failed to load save game from disk - SaveGameManager.LoadSaveGame returned null for ID: {saveData.SaveId}");
+                Logger.Debug($"PlaySave: This could indicate the save file is missing, corrupted, or inaccessible");
                 return;
             }
             
+            Logger.Debug($"PlaySave: Save game loaded successfully from disk");
+            Logger.Trace($"PlaySave: Loaded game state has {(loadedSaveData.GameState?.Variables?.Count ?? 0)} variable entries");
+            
             // Create story engine and register stories
+            Logger.Debug($"PlaySave: Creating story engine and registering stories...");
             var storyEngine = new StoryEngine();
             var stories = ExampleStories.GetAllStories();
+            Logger.Trace($"PlaySave: Found {stories.Count} stories to register");
+            
             foreach (var story in stories)
             {
+                Logger.Trace($"PlaySave: Registering story: {story.Id}");
                 storyEngine.RegisterStory(story);
             }
             
+            Logger.Debug($"PlaySave: Stories registered successfully");
+            
             // Create game view model with loaded state
+            Logger.Debug($"PlaySave: Creating GameViewModel with loaded state...");
             var gameViewModel = new GameViewModel(storyEngine, loadedSaveData.GameState);
+            Logger.Info($"PlaySave: GameViewModel created successfully, navigating to game view");
+            
             NavigateToView?.Invoke(gameViewModel);
+            Logger.Info($"PlaySave: Successfully loaded and started save game '{saveData.GameName}'");
         }
         catch (Exception ex)
         {
-            Logger.LogMethod("PlaySave", $"Error loading game: {ex.Message}");
+            Logger.Info($"PlaySave: Error loading game '{saveData.GameName}' (ID: {saveData.SaveId}): {ex.Message}");
+            Logger.Debug($"PlaySave: Exception details: {ex}");
+            Logger.Trace($"PlaySave: Full exception stack trace: {ex.StackTrace}");
         }
     }
     
