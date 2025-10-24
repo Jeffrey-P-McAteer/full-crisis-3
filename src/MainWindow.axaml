@@ -22,7 +22,7 @@
     <ContentControl Content="{Binding CurrentView}" IsEnabled="{Binding !IsQuitDialogVisible}" />
     
     <Border Background="#80000000" IsVisible="{Binding IsQuitDialogVisible}">
-      <Border Background="#2F2F2F" BorderBrush="White" BorderThickness="2" 
+      <Border Background="#2F2F2F" BorderBrush="#FF6B7280" BorderThickness="2"
               CornerRadius="10" Padding="30" 
               HorizontalAlignment="Center" VerticalAlignment="Center">
         <StackPanel Spacing="20">
