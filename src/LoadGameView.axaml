@@ -1,0 +1,128 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FullCrisis3"
+             x:Class="FullCrisis3.LoadGameView"
+             x:DataType="vm:LoadGameViewModel">
+
+  <Border Background="#FF2A3B47" 
+          BorderBrush="#FF6B7280" 
+          BorderThickness="2" 
+          CornerRadius="15" 
+          Padding="40" 
+          Margin="100,50">
+    
+    <Grid RowDefinitions="Auto,*,Auto">
+      
+      <!-- Title -->
+      <TextBlock Grid.Row="0" Text="Load Game" Classes="Title" FontSize="28" 
+                 HorizontalAlignment="Center" Margin="0,0,0,20" />
+      
+      <!-- Content Area -->
+      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MinHeight="300" Margin="0,20">
+        <Grid>
+          <!-- Loading indicator -->
+          <TextBlock Text="Loading saved games..." FontSize="16" Foreground="#FFAAAAAA" 
+                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                     IsVisible="{Binding IsLoading}" />
+          
+          <!-- No save games message -->
+          <StackPanel IsVisible="{Binding NoSaveGames}" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="No saved games found" FontSize="18" Foreground="#FFAAAAAA" 
+                       HorizontalAlignment="Center" Margin="0,0,0,10" />
+            <TextBlock Text="Start a new game to create your first save" FontSize="14" 
+                       Foreground="#FF888888" HorizontalAlignment="Center" />
+          </StackPanel>
+          
+          <!-- Save games list -->
+          <ListBox x:Name="SaveGamesList" IsVisible="{Binding HasSaveGames}" 
+                   ItemsSource="{Binding SavedGames}"
+                   SelectedItem="{Binding SelectedSave}"
+                   Background="Transparent"
+                   BorderThickness="0">
+          
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Border Background="#FF374151" 
+                      BorderBrush="#FF6B7280" 
+                      BorderThickness="1" 
+                      CornerRadius="8" 
+                      Padding="20" 
+                      Margin="0,5">
+                
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                  
+                  <!-- Game Title -->
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding GameName}" 
+                             FontSize="16" FontWeight="Bold" Foreground="White" />
+                  
+                  <!-- Save Date -->
+                  <TextBlock Grid.Row="0" Grid.Column="1" 
+                             Text="{Binding SavedAt, StringFormat='MMM dd, yyyy HH:mm'}" 
+                             FontSize="12" Foreground="#FFAAAAAA" 
+                             VerticalAlignment="Center" />
+                  
+                  <!-- Player Name -->
+                  <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                             Text="{Binding PlayerName, StringFormat='Player: {0}'}" 
+                             FontSize="14" Foreground="#FFCCCCCC" Margin="0,5,0,0" />
+                  
+                  <!-- Current Progress -->
+                  <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                             Text="{Binding CurrentDialogueTitle, StringFormat='At: {0}'}" 
+                             FontSize="12" Foreground="#FF888888" Margin="0,3,0,0" />
+                  
+                </Grid>
+                
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+          
+          <ListBox.Styles>
+            <Style Selector="ListBoxItem">
+              <Setter Property="Padding" Value="0" />
+              <Setter Property="Margin" Value="0" />
+              <Setter Property="Background" Value="Transparent" />
+            </Style>
+            <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+              <Setter Property="Background" Value="Transparent" />
+            </Style>
+            <Style Selector="ListBoxItem:selected Border">
+              <Setter Property="BorderBrush" Value="#FF4A90E2" />
+              <Setter Property="BorderThickness" Value="2" />
+              <Setter Property="Background" Value="#FF3A4A5C" />
+            </Style>
+          </ListBox.Styles>
+          
+        </ListBox>
+        
+        </Grid>
+      </ScrollViewer>
+      
+      <!-- Action Buttons -->
+      <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" Margin="0,20,0,0">
+        
+        <Button x:Name="PlayButton" Content="Play Selected" Background="#FF4CAF50" Classes="CustomButton" 
+                FontSize="16" Padding="20,10" 
+                Command="{Binding PlaySelectedCommand}"
+                IsEnabled="{Binding SelectedSave, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        
+        <Button x:Name="DeleteButton" Content="Delete" Background="#FFD32F2F" Classes="CustomButton" 
+                FontSize="16" Padding="20,10" 
+                Command="{Binding DeleteSelectedCommand}"
+                IsEnabled="{Binding SelectedSave, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        
+        <Button x:Name="RefreshButton" Content="Refresh" Background="#FF6B7280" Classes="CustomButton" 
+                FontSize="16" Padding="20,10" 
+                Command="{Binding RefreshCommand}" />
+        
+        <Button x:Name="BackButton" Content="Back" Background="#FF6B7280" Classes="CustomButton" 
+                FontSize="16" Padding="20,10" 
+                Command="{Binding BackCommand}" />
+        
+      </StackPanel>
+      
+    </Grid>
+    
+  </Border>
+  
+</UserControl>

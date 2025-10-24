@@ -23,11 +23,15 @@ public class GameViewModel : ViewModelBase
     private bool _hasUnsavedChanges = false;
     private bool _showQuitDialog = false;
     private DateTime _lastSaved = DateTime.MinValue;
+    private BackgroundThemeConfig _backgroundTheme;
     
     public GameViewModel(StoryEngine storyEngine, StoryState gameState)
     {
         _storyEngine = storyEngine;
         _gameState = gameState;
+        
+        // Set background theme based on story
+        _backgroundTheme = GetThemeForStory(_gameState.StoryId);
         
         // Commands
         ContinueCommand = ReactiveCommand.Create(Continue);
@@ -53,6 +57,12 @@ public class GameViewModel : ViewModelBase
     {
         get => _dialogueText;
         private set => this.RaiseAndSetIfChanged(ref _dialogueText, value);
+    }
+    
+    public BackgroundThemeConfig BackgroundTheme
+    {
+        get => _backgroundTheme;
+        private set => this.RaiseAndSetIfChanged(ref _backgroundTheme, value);
     }
     
     public string PlayerInput
@@ -244,13 +254,11 @@ public class GameViewModel : ViewModelBase
     {
         try
         {
-            var settings = SettingsManager.LoadSettings();
-            // In a full implementation, you'd save the entire game state
-            // For now, we'll just mark as saved and update timestamp
+            var saveId = SaveGameManager.SaveGame(_storyEngine, _gameState, DialogueTitle);
             _lastSaved = DateTime.Now;
             HasUnsavedChanges = false;
             
-            Logger.Info($"Game saved at {_lastSaved:HH:mm:ss}");
+            Logger.Info($"Game saved with ID: {saveId} at {_lastSaved:HH:mm:ss}");
             this.RaisePropertyChanged(nameof(LastSavedText));
         }
         catch (Exception ex)
@@ -292,5 +300,15 @@ public class GameViewModel : ViewModelBase
     private void BackToMenu()
     {
         QuitGame(); // Use quit logic which checks for unsaved changes
+    }
+    
+    private BackgroundThemeConfig GetThemeForStory(string storyId)
+    {
+        return storyId switch
+        {
+            "firefighter" => AnimatedBackground.BackgroundThemes.FirefighterCrisis,
+            "medical" => AnimatedBackground.BackgroundThemes.MedicalEmergency,
+            _ => AnimatedBackground.BackgroundThemes.Cityscape
+        };
     }
 }

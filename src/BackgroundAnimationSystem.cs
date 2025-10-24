@@ -222,9 +222,12 @@ public class AnimatedBackground : Control
         timer.Start();
     }
     
-    private void SetupCityscapeTheme()
+    /// <summary>
+    /// Predefined theme configurations for different story types
+    /// </summary>
+    public static class BackgroundThemes
     {
-        _theme = new BackgroundThemeConfig
+        public static BackgroundThemeConfig Cityscape => new()
         {
             Name = "Cityscape",
             SkyColor = Color.FromRgb(5, 5, 15),
@@ -234,8 +237,39 @@ public class AnimatedBackground : Control
             LightOffColor = Color.FromRgb(25, 25, 35),
             StarDensity = 0.015,
             LightBlinkRate = 2.5,
-            ParallaxSpeeds = new double[] { 5.0, 15.0, 30.0 } // Background, midground, foreground
+            ParallaxSpeeds = new double[] { 5.0, 15.0, 30.0 }
         };
+        
+        public static BackgroundThemeConfig FirefighterCrisis => new()
+        {
+            Name = "Firefighter",
+            SkyColor = Color.FromRgb(40, 15, 5), // Smoky orange sky
+            HillColor = Color.FromRgb(25, 10, 5),
+            BuildingColor = Color.FromRgb(15, 8, 5), // Darker buildings in emergency
+            LightOnColor = Color.FromRgb(255, 100, 50), // Emergency orange lights
+            LightOffColor = Color.FromRgb(60, 20, 10),
+            StarDensity = 0.005, // Fewer stars due to smoke
+            LightBlinkRate = 0.8, // Faster blinking for urgency
+            ParallaxSpeeds = new double[] { 8.0, 20.0, 35.0 } // Faster movement for urgency
+        };
+        
+        public static BackgroundThemeConfig MedicalEmergency => new()
+        {
+            Name = "Medical",
+            SkyColor = Color.FromRgb(10, 20, 35), // Cool blue-grey
+            HillColor = Color.FromRgb(20, 25, 30),
+            BuildingColor = Color.FromRgb(12, 15, 20),
+            LightOnColor = Color.FromRgb(100, 200, 255), // Cool blue/white lights
+            LightOffColor = Color.FromRgb(30, 35, 45),
+            StarDensity = 0.02,
+            LightBlinkRate = 1.2, // Moderate urgency
+            ParallaxSpeeds = new double[] { 6.0, 18.0, 32.0 }
+        };
+    }
+    
+    private void SetupCityscapeTheme()
+    {
+        _theme = BackgroundThemes.Cityscape;
         BackgroundTheme = _theme;
     }
     

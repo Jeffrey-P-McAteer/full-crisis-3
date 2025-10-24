@@ -45,6 +45,10 @@ public partial class MainWindow : Window
                     RestoreFocusAfterQuitDialog();
                 }
             }
+            else if (e.PropertyName == nameof(MainWindowViewModel.CurrentBackgroundTheme))
+            {
+                UpdateBackgroundTheme(viewModel.CurrentBackgroundTheme);
+            }
         };
     }
 
@@ -194,6 +198,18 @@ public partial class MainWindow : Window
     {
         _quitDialogInputManager.HandleGamepadInput(input);
     }
+    
+    private void UpdateBackgroundTheme(BackgroundThemeConfig? newTheme)
+    {
+        if (newTheme == null) return;
+        
+        // Find the AnimatedBackground control
+        var animatedBackground = this.FindLogicalDescendantOfType<AnimatedBackground>();
+        if (animatedBackground != null)
+        {
+            animatedBackground.SetTheme(newTheme);
+        }
+    }
 }
 
 [AutoLog]
@@ -312,6 +328,77 @@ public partial class SettingsView : UserControl, IGamepadNavigable
         _inputManager.HandleKeyInput(e);
     }
 
+    public bool HandleGamepadInput(string input)
+    {
+        return _inputManager.HandleGamepadInput(input);
+    }
+}
+
+[AutoLog]
+public partial class LoadGameView : UserControl, IGamepadNavigable
+{
+    private readonly InputManager _inputManager = new();
+    private LoadGameViewModel? _viewModel;
+    
+    public LoadGameView()
+    {
+        InitializeComponent();
+        Loaded += (s, e) => SetupControls();
+        KeyDown += OnKeyDown;
+        DataContextChanged += OnDataContextChanged;
+    }
+    
+    private void OnDataContextChanged(object? sender, EventArgs e)
+    {
+        _viewModel = DataContext as LoadGameViewModel;
+    }
+    
+    private void SetupControls()
+    {
+        var controls = new Control[]
+        {
+            this.FindControl<ListBox>("SaveGamesList") ?? new ListBox(),
+            this.FindControl<Button>("PlayButton")!,
+            this.FindControl<Button>("DeleteButton")!,
+            this.FindControl<Button>("RefreshButton")!,
+            this.FindControl<Button>("BackButton")!
+        };
+        
+        _inputManager.ClearSelectables();
+        
+        for (int i = 0; i < controls.Length; i++)
+        {
+            if (controls[i] != null)
+            {
+                _inputManager.RegisterSelectable(controls[i], tabIndex: i);
+            }
+        }
+        
+        if (controls.Length > 0) _inputManager.SelectItem(0);
+    }
+    
+    private void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        // Check if focus is on a text input element
+        if (IsTextInputFocused())
+        {
+            // Let text input handle the key naturally, only handle navigation keys
+            if (e.Key == Key.Tab || e.Key == Key.Enter || e.Key == Key.Escape)
+            {
+                _inputManager.HandleKeyInput(e);
+            }
+            return;
+        }
+        
+        _inputManager.HandleKeyInput(e);
+    }
+    
+    private bool IsTextInputFocused()
+    {
+        var focusedElement = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
+        return focusedElement is TextBox || focusedElement is ComboBox;
+    }
+    
     public bool HandleGamepadInput(string input)
     {
         return _inputManager.HandleGamepadInput(input);

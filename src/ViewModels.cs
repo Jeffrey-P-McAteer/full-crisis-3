@@ -29,7 +29,11 @@ public class MainMenuViewModel : ViewModelBase
             newGameViewModel.NavigateToView = NavigateToView;
             NavigateToView?.Invoke(newGameViewModel);
         });
-        LoadGameCommand = ReactiveCommand.Create(() => NavigateToSubMenu?.Invoke("Load Game"));
+        LoadGameCommand = ReactiveCommand.Create(() => {
+            var loadGameViewModel = new LoadGameViewModel();
+            loadGameViewModel.NavigateToView = NavigateToView;
+            NavigateToView?.Invoke(loadGameViewModel);
+        });
         SettingsCommand = ReactiveCommand.Create(() => NavigateToSubMenu?.Invoke("Settings"));
         QuitCommand = ReactiveCommand.Create(() => ShowQuitDialog?.Invoke());
     }
@@ -119,6 +123,7 @@ public class MainWindowViewModel : ViewModelBase
     private ViewModelBase? _currentView;
     private bool _isQuitDialogVisible;
     private SimpleGamepadInput? _gamepadInput;
+    private BackgroundThemeConfig? _currentBackgroundTheme;
 
     public ViewModelBase? CurrentView
     {
@@ -130,6 +135,12 @@ public class MainWindowViewModel : ViewModelBase
     {
         get => _isQuitDialogVisible;
         set => this.RaiseAndSetIfChanged(ref _isQuitDialogVisible, value);
+    }
+    
+    public BackgroundThemeConfig? CurrentBackgroundTheme
+    {
+        get => _currentBackgroundTheme;
+        private set => this.RaiseAndSetIfChanged(ref _currentBackgroundTheme, value);
     }
 
     public ReactiveCommand<Unit, Unit> ConfirmQuitCommand { get; }
@@ -184,9 +195,23 @@ public class MainWindowViewModel : ViewModelBase
             {
                 newGameVM.NavigateToView = NavigateToView;
             }
+            else if (vm is LoadGameViewModel loadGameVM)
+            {
+                loadGameVM.NavigateToView = NavigateToView;
+            }
             else if (vm is GameViewModel gameVM)
             {
                 gameVM.NavigateToView = NavigateToView;
+                CurrentBackgroundTheme = gameVM.BackgroundTheme;
+                
+                // Listen for theme changes
+                gameVM.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(GameViewModel.BackgroundTheme))
+                    {
+                        CurrentBackgroundTheme = gameVM.BackgroundTheme;
+                    }
+                };
             }
             else if (vm is MainMenuViewModel mainMenuVM)
             {
@@ -197,6 +222,9 @@ public class MainWindowViewModel : ViewModelBase
                 
                 // Clear the view stack when returning to main menu
                 _viewStack.Clear();
+                
+                // Reset to default theme
+                CurrentBackgroundTheme = AnimatedBackground.BackgroundThemes.Cityscape;
             }
         }
     }
@@ -293,6 +321,7 @@ public class MainWindowViewModel : ViewModelBase
             MainMenuViewModel => FindControlInWindow<MainMenuView>(),
             SettingsViewModel => FindControlInWindow<SettingsView>(),
             NewGameViewModel => FindControlInWindow<NewGameView>(),
+            LoadGameViewModel => FindControlInWindow<LoadGameView>(),
             GameViewModel => FindControlInWindow<GameView>(),
             _ => null
         };

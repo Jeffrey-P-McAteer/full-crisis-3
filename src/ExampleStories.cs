@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace FullCrisis3;
 
@@ -105,6 +106,18 @@ public static class ExampleStories
                 "systematic approach. You've made a real difference!")
             
             .Build();
+    }
+    
+    /// <summary>
+    /// Gets all available example stories
+    /// </summary>
+    public static List<Story> GetAllStories()
+    {
+        return new List<Story>
+        {
+            CreateFirefighterStory(),
+            CreateMedicalStory()
+        };
     }
     
     /// <summary>
