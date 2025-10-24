@@ -182,6 +182,8 @@ public class AnimatedBackground : Control
     private readonly List<BackgroundElement>[] _layers = new List<BackgroundElement>[3];
     private BackgroundThemeConfig _theme = new();
     private DateTime _lastUpdate = DateTime.UtcNow;
+    private Size _lastSize = new Size(0, 0);
+    private bool _needsRegeneration = false;
     
     public static readonly StyledProperty<BackgroundThemeConfig> BackgroundThemeProperty =
         AvaloniaProperty.Register<AnimatedBackground, BackgroundThemeConfig>(nameof(BackgroundTheme));
@@ -207,6 +209,9 @@ public class AnimatedBackground : Control
         
         SetupCityscapeTheme();
         CreateCityscapeElements();
+        
+        // Listen for size changes
+        SizeChanged += OnSizeChanged;
         
         // Start animation loop
         var timer = new Avalonia.Threading.DispatcherTimer
@@ -236,28 +241,26 @@ public class AnimatedBackground : Control
     
     private void CreateCityscapeElements()
     {
-        var random = Random.Shared;
-        
-        // Layer 0: Stars and hills (background)
-        CreateStars(_layers[0], 50);
-        CreateHills(_layers[0], 3);
+        // Use default 1280x720 dimensions initially
+        CreateStars(_layers[0], 50, 1280, 720);
+        CreateHills(_layers[0], 3, 1280, 720);
         
         // Layer 1: Mid-distance buildings
-        CreateBuildings(_layers[1], 8, 60, 120, _theme.ParallaxSpeeds?.Length > 1 ? _theme.ParallaxSpeeds[1] : 15.0);
+        CreateBuildings(_layers[1], 8, 60, 120, _theme.ParallaxSpeeds?.Length > 1 ? _theme.ParallaxSpeeds[1] : 15.0, 1280, 720);
         
         // Layer 2: Foreground buildings
-        CreateBuildings(_layers[2], 6, 100, 200, _theme.ParallaxSpeeds?.Length > 2 ? _theme.ParallaxSpeeds[2] : 30.0);
+        CreateBuildings(_layers[2], 6, 100, 200, _theme.ParallaxSpeeds?.Length > 2 ? _theme.ParallaxSpeeds[2] : 30.0, 1280, 720);
     }
     
-    private void CreateStars(List<BackgroundElement> layer, int count)
+    private void CreateStars(List<BackgroundElement> layer, int count, double screenWidth, double screenHeight)
     {
         var random = Random.Shared;
         for (int i = 0; i < count; i++)
         {
             layer.Add(new StarElement
             {
-                X = random.NextDouble() * 1280,
-                Y = random.NextDouble() * 300, // Upper portion of screen
+                X = random.NextDouble() * screenWidth,
+                Y = random.NextDouble() * (screenHeight * 0.4), // Upper portion of screen
                 Width = 2,
                 Height = 2,
                 Speed = 0, // Stars don't move
@@ -266,19 +269,20 @@ public class AnimatedBackground : Control
         }
     }
     
-    private void CreateHills(List<BackgroundElement> layer, int count)
+    private void CreateHills(List<BackgroundElement> layer, int count, double screenWidth, double screenHeight)
     {
         var random = Random.Shared;
-        double spacing = 1280.0 / count;
+        double spacing = screenWidth / count;
         
         for (int i = 0; i < count; i++)
         {
+            var hillBaseY = screenHeight * 0.6; // Position hills in lower 40% of screen
             var hill = new HillElement
             {
                 X = i * spacing + random.NextDouble() * spacing * 0.5,
-                Y = 400 + random.NextDouble() * 100,
-                Width = spacing + random.NextDouble() * 200,
-                Height = 200 + random.NextDouble() * 100,
+                Y = hillBaseY + random.NextDouble() * (screenHeight * 0.1),
+                Width = spacing + random.NextDouble() * (screenWidth * 0.15),
+                Height = (screenHeight * 0.15) + random.NextDouble() * (screenHeight * 0.1),
                 Speed = _theme.ParallaxSpeeds?.Length > 0 ? _theme.ParallaxSpeeds[0] : 5.0
             };
             
@@ -296,28 +300,29 @@ public class AnimatedBackground : Control
         }
     }
     
-    private void CreateBuildings(List<BackgroundElement> layer, int count, double minHeight, double maxHeight, double speed)
+    private void CreateBuildings(List<BackgroundElement> layer, int count, double minHeight, double maxHeight, double speed, double screenWidth, double screenHeight)
     {
         var random = Random.Shared;
-        double spacing = 1280.0 / count;
+        double spacing = screenWidth / count;
         
         for (int i = 0; i < count; i++)
         {
-            double width = 40 + random.NextDouble() * 80;
-            double height = minHeight + random.NextDouble() * (maxHeight - minHeight);
+            double width = (screenWidth * 0.03) + random.NextDouble() * (screenWidth * 0.06);
+            double height = (screenHeight * minHeight / 720.0) + random.NextDouble() * (screenHeight * (maxHeight - minHeight) / 720.0);
             
             var building = new BuildingElement
             {
                 X = i * spacing + random.NextDouble() * spacing * 0.3,
-                Y = 720 - height,
+                Y = screenHeight - height,
                 Width = width,
                 Height = height,
                 Speed = speed
             };
             
-            // Add windows
-            int windowRows = (int)(height / 25);
-            int windowCols = (int)(width / 15);
+            // Add windows - scale with building size
+            double windowSize = Math.Max(2, screenHeight / 240); // Scale window size with screen height
+            int windowRows = Math.Max(1, (int)(height / (windowSize * 8)));
+            int windowCols = Math.Max(1, (int)(width / (windowSize * 5)));
             
             for (int row = 1; row < windowRows - 1; row++)
             {
@@ -327,8 +332,10 @@ public class AnimatedBackground : Control
                     {
                         building.Windows.Add(new BuildingElement.WindowLight
                         {
-                            X = col * 15 + 3,
-                            Y = row * 25 + 3,
+                            X = col * (windowSize * 5) + windowSize,
+                            Y = row * (windowSize * 8) + windowSize,
+                            Width = windowSize,
+                            Height = windowSize,
                             IsOn = random.NextDouble() > 0.6,
                             NextBlinkTime = random.NextDouble() * _theme.LightBlinkRate
                         });
@@ -340,11 +347,35 @@ public class AnimatedBackground : Control
         }
     }
     
+    private void OnSizeChanged(object? sender, SizeChangedEventArgs e)
+    {
+        if (_lastSize.Width == 0 && _lastSize.Height == 0)
+        {
+            _lastSize = e.NewSize;
+            return;
+        }
+        
+        // Only regenerate if size changed significantly (more than 50 pixels in either dimension)
+        if (Math.Abs(e.NewSize.Width - _lastSize.Width) > 50 || 
+            Math.Abs(e.NewSize.Height - _lastSize.Height) > 50)
+        {
+            _lastSize = e.NewSize;
+            _needsRegeneration = true;
+        }
+    }
+    
     private void UpdateAndRender()
     {
         var now = DateTime.UtcNow;
         var deltaTime = (now - _lastUpdate).TotalSeconds;
         _lastUpdate = now;
+        
+        // Check if we need to regenerate elements due to size change
+        if (_needsRegeneration && Bounds.Width > 0 && Bounds.Height > 0)
+        {
+            RegenerateElementsForNewSize();
+            _needsRegeneration = false;
+        }
         
         // Update all elements in all layers
         foreach (var layer in _layers)
@@ -356,6 +387,43 @@ public class AnimatedBackground : Control
         }
         
         InvalidateVisual();
+    }
+    
+    private void RegenerateElementsForNewSize()
+    {
+        // Clear existing elements
+        ClearElements();
+        
+        // Regenerate elements based on new size
+        var screenWidth = Bounds.Width;
+        var screenHeight = Bounds.Height;
+        
+        // Scale element counts based on screen area (relative to 1280x720 baseline)
+        var baselineArea = 1280.0 * 720.0;
+        var currentArea = screenWidth * screenHeight;
+        var scaleFactor = Math.Sqrt(currentArea / baselineArea);
+        
+        // Clamp scale factor to reasonable bounds
+        scaleFactor = Math.Max(0.5, Math.Min(3.0, scaleFactor));
+        
+        // Layer 0: Stars and hills (background) - scale with screen area
+        var starCount = (int)(50 * scaleFactor);
+        var hillCount = Math.Max(3, (int)(3 * (screenWidth / 1280.0)));
+        
+        CreateStars(_layers[0], starCount, screenWidth, screenHeight);
+        CreateHills(_layers[0], hillCount, screenWidth, screenHeight);
+        
+        // Layer 1: Mid-distance buildings - scale with screen width
+        var midBuildingCount = Math.Max(6, (int)(8 * (screenWidth / 1280.0)));
+        CreateBuildings(_layers[1], midBuildingCount, 60, 120, 
+                       _theme.ParallaxSpeeds?.Length > 1 ? _theme.ParallaxSpeeds[1] : 15.0,
+                       screenWidth, screenHeight);
+        
+        // Layer 2: Foreground buildings - scale with screen width
+        var frontBuildingCount = Math.Max(4, (int)(6 * (screenWidth / 1280.0)));
+        CreateBuildings(_layers[2], frontBuildingCount, 100, 200, 
+                       _theme.ParallaxSpeeds?.Length > 2 ? _theme.ParallaxSpeeds[2] : 30.0,
+                       screenWidth, screenHeight);
     }
     
     public override void Render(DrawingContext context)
