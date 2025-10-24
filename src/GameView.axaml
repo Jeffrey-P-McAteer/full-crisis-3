@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FullCrisis3"
+             x:Class="FullCrisis3.GameView"
+             x:DataType="vm:GameViewModel">
+
+  <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,3*,*">
+    <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Text="{Binding DialogueTitle}" Classes="Title" FontSize="24" Margin="0,30,0,20" />
+    
+    <Border Grid.Row="1" Grid.Column="1" 
+            Background="#FF2A3B47" 
+            BorderBrush="#FF6B7280" 
+            BorderThickness="2" 
+            CornerRadius="15" 
+            Padding="30">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="25">
+          
+          <!-- Dialogue Text -->
+          <TextBlock Text="{Binding DialogueText}" 
+                     FontSize="16" Foreground="White" TextWrapping="Wrap" 
+                     LineHeight="24" />
+          
+          <!-- Text Input Section -->
+          <StackPanel Spacing="15" IsVisible="{Binding ShowInputControls}">
+            <TextBlock Text="{Binding InputPrompt}" FontSize="14" Foreground="#FFCCCCCC" />
+            <TextBox Text="{Binding PlayerInput}" FontSize="14" 
+                     Background="#FF3A4D5A" Foreground="White" BorderBrush="#FF6B7280" 
+                     BorderThickness="2" CornerRadius="5" Padding="10,8" 
+                     Watermark="Type your answer here..." />
+            <Button Content="Continue" Background="#FF2E7D32" Classes="CustomButton" 
+                    FontSize="14" Padding="15,8" HorizontalAlignment="Left"
+                    Command="{Binding SubmitInputCommand}" />
+          </StackPanel>
+          
+          <!-- Choice Buttons Section -->
+          <StackPanel Spacing="15" IsVisible="{Binding ShowChoiceButtons}">
+            <TextBlock Text="Choose your action:" FontSize="14" Foreground="#FFCCCCCC" />
+            <StackPanel Spacing="10">
+              <Button Content="{Binding Choice1Text}" Background="#FF1976D2" Classes="CustomButton" 
+                      FontSize="14" Padding="15,10" HorizontalAlignment="Stretch"
+                      Command="{Binding Choice1Command}" IsVisible="{Binding ShowChoice1}" />
+              <Button Content="{Binding Choice2Text}" Background="#FFF57C00" Classes="CustomButton" 
+                      FontSize="14" Padding="15,10" HorizontalAlignment="Stretch"
+                      Command="{Binding Choice2Command}" IsVisible="{Binding ShowChoice2}" />
+              <Button Content="{Binding Choice3Text}" Background="#FF7B1FA2" Classes="CustomButton" 
+                      FontSize="14" Padding="15,10" HorizontalAlignment="Stretch"
+                      Command="{Binding Choice3Command}" IsVisible="{Binding ShowChoice3}" />
+            </StackPanel>
+          </StackPanel>
+          
+          <!-- Dropdown Selection Section -->
+          <StackPanel Spacing="15" IsVisible="{Binding ShowDropdown}">
+            <TextBlock Text="Select your approach:" FontSize="14" Foreground="#FFCCCCCC" />
+            <ComboBox ItemsSource="{Binding AvailableChoices}" 
+                      SelectedItem="{Binding SelectedChoice}"
+                      FontSize="14" Background="#FF3A4D5A" Foreground="White" 
+                      BorderBrush="#FF6B7280" BorderThickness="2" CornerRadius="5" 
+                      Padding="10,8" MinHeight="40">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Text}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Content="Continue" Background="#FF2E7D32" Classes="CustomButton" 
+                    FontSize="14" Padding="15,8" HorizontalAlignment="Left"
+                    Command="{Binding SubmitInputCommand}" />
+          </StackPanel>
+          
+          <!-- Continue Button Section -->
+          <Button Content="Continue" Background="#FF2E7D32" Classes="CustomButton" 
+                  FontSize="16" Padding="20,10" HorizontalAlignment="Center"
+                  Command="{Binding ContinueCommand}" IsVisible="{Binding ShowContinueButton}" />
+          
+          <!-- Game Complete Section -->
+          <StackPanel Spacing="15" IsVisible="{Binding IsGameComplete}">
+            <Border Background="#FF4CAF50" CornerRadius="8" Padding="15">
+              <TextBlock Text="🎉 Story Complete! 🎉" FontSize="18" Foreground="White" 
+                         FontWeight="Bold" HorizontalAlignment="Center" />
+            </Border>
+            <Button Content="Back to Main Menu" Background="#FF6B7280" Classes="CustomButton" 
+                    FontSize="16" Padding="20,10" HorizontalAlignment="Center"
+                    Command="{Binding BackToMenuCommand}" />
+          </StackPanel>
+          
+        </StackPanel>
+      </ScrollViewer>
+    </Border>
+    
+    <!-- Back Button -->
+    <Button Grid.Row="2" Grid.Column="0" Content="Main Menu" 
+            Background="#FF6B7280" Classes="CustomButton" 
+            FontSize="14" Padding="15,8" Margin="50,20,0,50"
+            HorizontalAlignment="Left" VerticalAlignment="Bottom"
+            Command="{Binding BackToMenuCommand}" />
+  </Grid>
+</UserControl>

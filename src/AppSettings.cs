@@ -9,6 +9,7 @@ public class AppSettings
 {
     public bool AudioEnabled { get; set; } = true;
     public bool BackgroundMusicEnabled { get; set; } = true;
+    public string? LastPlayerName { get; set; }
 
     private static readonly string _appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FullCrisis3");
     private static readonly string _settingsFilePath = Path.Combine(_appDataPath, "settings.json");

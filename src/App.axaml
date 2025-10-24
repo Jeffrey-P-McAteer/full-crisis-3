@@ -20,6 +20,12 @@
     <DataTemplate DataType="vm:SettingsViewModel">
       <views:SettingsView />
     </DataTemplate>
+    <DataTemplate DataType="vm:NewGameViewModel">
+      <views:NewGameView />
+    </DataTemplate>
+    <DataTemplate DataType="vm:GameViewModel">
+      <views:GameView />
+    </DataTemplate>
   </Application.DataTemplates>
 
   <Application.Styles>

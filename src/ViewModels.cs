@@ -18,12 +18,17 @@ public class MainMenuViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> QuitCommand { get; }
 
     public Action<string>? NavigateToSubMenu { get; set; }
+    public Action<object>? NavigateToView { get; set; }
     public Action? ShowQuitDialog { get; set; }
     public Action? RestoreFocusToQuit { get; set; }
 
     public MainMenuViewModel()
     {
-        NewGameCommand = ReactiveCommand.Create(() => NavigateToSubMenu?.Invoke("New Game"));
+        NewGameCommand = ReactiveCommand.Create(() => {
+            var newGameViewModel = new NewGameViewModel();
+            newGameViewModel.NavigateToView = NavigateToView;
+            NavigateToView?.Invoke(newGameViewModel);
+        });
         LoadGameCommand = ReactiveCommand.Create(() => NavigateToSubMenu?.Invoke("Load Game"));
         SettingsCommand = ReactiveCommand.Create(() => NavigateToSubMenu?.Invoke("Settings"));
         QuitCommand = ReactiveCommand.Create(() => ShowQuitDialog?.Invoke());
@@ -136,6 +141,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         var mainMenuViewModel = new MainMenuViewModel();
         mainMenuViewModel.NavigateToSubMenu = NavigateToSubMenu;
+        mainMenuViewModel.NavigateToView = NavigateToView;
         mainMenuViewModel.ShowQuitDialog = () => IsQuitDialogVisible = true;
         CurrentView = mainMenuViewModel;
 
@@ -165,6 +171,26 @@ public class MainWindowViewModel : ViewModelBase
             IsQuitDialogVisible = true;
     }
 
+    private void NavigateToView(object viewModel)
+    {
+        if (CurrentView != null) _viewStack.Push(CurrentView);
+        
+        if (viewModel is ViewModelBase vm)
+        {
+            CurrentView = vm;
+            
+            // Set up navigation for specific view models
+            if (vm is NewGameViewModel newGameVM)
+            {
+                newGameVM.NavigateToView = NavigateToView;
+            }
+            else if (vm is GameViewModel gameVM)
+            {
+                gameVM.NavigateToView = NavigateToView;
+            }
+        }
+    }
+    
     private void NavigateToSubMenu(string menuType)
     {
         if (CurrentView != null) _viewStack.Push(CurrentView);
