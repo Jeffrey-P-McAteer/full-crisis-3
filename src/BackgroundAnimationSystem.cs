@@ -183,18 +183,18 @@ public class AnimatedBackground : Control
     private BackgroundThemeConfig _theme = new();
     private DateTime _lastUpdate = DateTime.UtcNow;
     
-    public static readonly StyledProperty<BackgroundThemeConfig> ThemeProperty =
-        AvaloniaProperty.Register<AnimatedBackground, BackgroundThemeConfig>(nameof(Theme));
+    public static readonly StyledProperty<BackgroundThemeConfig> BackgroundThemeProperty =
+        AvaloniaProperty.Register<AnimatedBackground, BackgroundThemeConfig>(nameof(BackgroundTheme));
     
-    public BackgroundThemeConfig Theme
+    public BackgroundThemeConfig BackgroundTheme
     {
-        get => GetValue(ThemeProperty);
-        set => SetValue(ThemeProperty, value);
+        get => GetValue(BackgroundThemeProperty);
+        set => SetValue(BackgroundThemeProperty, value);
     }
     
     static AnimatedBackground()
     {
-        AffectsRender<AnimatedBackground>(ThemeProperty);
+        AffectsRender<AnimatedBackground>(BackgroundThemeProperty);
     }
     
     public AnimatedBackground()
@@ -231,7 +231,7 @@ public class AnimatedBackground : Control
             LightBlinkRate = 2.5,
             ParallaxSpeeds = new double[] { 5.0, 15.0, 30.0 } // Background, midground, foreground
         };
-        Theme = _theme;
+        BackgroundTheme = _theme;
     }
     
     private void CreateCityscapeElements()
@@ -243,10 +243,10 @@ public class AnimatedBackground : Control
         CreateHills(_layers[0], 3);
         
         // Layer 1: Mid-distance buildings
-        CreateBuildings(_layers[1], 8, 60, 120, _theme.ParallaxSpeeds[1]);
+        CreateBuildings(_layers[1], 8, 60, 120, _theme.ParallaxSpeeds?.Length > 1 ? _theme.ParallaxSpeeds[1] : 15.0);
         
         // Layer 2: Foreground buildings
-        CreateBuildings(_layers[2], 6, 100, 200, _theme.ParallaxSpeeds[2]);
+        CreateBuildings(_layers[2], 6, 100, 200, _theme.ParallaxSpeeds?.Length > 2 ? _theme.ParallaxSpeeds[2] : 30.0);
     }
     
     private void CreateStars(List<BackgroundElement> layer, int count)
@@ -279,7 +279,7 @@ public class AnimatedBackground : Control
                 Y = 400 + random.NextDouble() * 100,
                 Width = spacing + random.NextDouble() * 200,
                 Height = 200 + random.NextDouble() * 100,
-                Speed = _theme.ParallaxSpeeds[0]
+                Speed = _theme.ParallaxSpeeds?.Length > 0 ? _theme.ParallaxSpeeds[0] : 5.0
             };
             
             // Generate hill shape
@@ -379,14 +379,17 @@ public class AnimatedBackground : Control
     public void SetTheme(BackgroundThemeConfig newTheme)
     {
         _theme = newTheme;
-        Theme = newTheme;
+        BackgroundTheme = newTheme;
         
         // Update element speeds
-        for (int i = 0; i < _layers.Length && i < newTheme.ParallaxSpeeds.Length; i++)
+        if (newTheme.ParallaxSpeeds != null)
         {
-            foreach (var element in _layers[i])
+            for (int i = 0; i < _layers.Length && i < newTheme.ParallaxSpeeds.Length; i++)
             {
-                element.Speed = newTheme.ParallaxSpeeds[i];
+                foreach (var element in _layers[i])
+                {
+                    element.Speed = newTheme.ParallaxSpeeds[i];
+                }
             }
         }
         

@@ -36,14 +36,53 @@
     <!-- Base CustomButton style for all app buttons -->
     <Style Selector="Button.CustomButton">
       <Setter Property="FontFamily" Value="{StaticResource LetterGothicFont}" />
-      <Setter Property="BorderBrush" Value="White" />
-      <Setter Property="BorderThickness" Value="3" />
+      <Setter Property="BorderBrush" Value="#FF6B7280" />
+      <Setter Property="BorderThickness" Value="2" />
       <Setter Property="Foreground" Value="White" />
     </Style>
     
-    <!-- CustomButton focus behavior -->
+    <!-- CustomButton focus behavior with animated dashed outline -->
     <Style Selector="Button.CustomButton:focus">
-      <Setter Property="BorderBrush" Value="Yellow" />
+      <Setter Property="BorderBrush" Value="#FF9CA3AF" />
+      <Setter Property="BorderThickness" Value="3" />
+    </Style>
+    
+    <!-- Template for buttons with animated focus border -->
+    <Style Selector="Button.CustomButton">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Panel>
+            <!-- Main button content -->
+            <Border Name="PART_Border" 
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="8"
+                    Padding="{TemplateBinding Padding}">
+              <ContentPresenter Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              VerticalAlignment="Center"
+                              HorizontalAlignment="Center"
+                              TextBlock.Foreground="{TemplateBinding Foreground}"
+                              TextBlock.FontFamily="{TemplateBinding FontFamily}"
+                              TextBlock.FontSize="{TemplateBinding FontSize}" />
+            </Border>
+            
+            <!-- Animated dashed border for focus -->
+            <vm:AnimatedDashedBorder Name="PART_FocusBorder"
+                                   IsVisible="False"
+                                   DashLength="8"
+                                   AnimationSpeed="30"
+                                   StrokeThickness="2" />
+          </Panel>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    
+    <!-- Show animated border when focused -->
+    <Style Selector="Button.CustomButton:focus /template/ vm|AnimatedDashedBorder#PART_FocusBorder">
+      <Setter Property="IsVisible" Value="True" />
     </Style>
     
     <!-- Override default FluentTheme hover styles to preserve button background -->
