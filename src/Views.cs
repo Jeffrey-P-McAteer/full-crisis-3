@@ -481,78 +481,21 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
             return;
         }
         
-        // If we're in the save games list, handle navigation within it
-        if (_isInSaveGamesList)
+        // Handle loading selected save game from main navigation
+        if ((e.Key == Key.Enter || e.Key == Key.Space) && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
         {
-            switch (e.Key)
+            Logger.Debug($"OnKeyDown: Enter/Space on SaveGamesList, SelectedSave={_viewModel?.SelectedSave?.GameName ?? "null"}, HasSaveGames={_viewModel?.HasSaveGames}");
+            if (_viewModel?.SelectedSave != null)
             {
-                case Key.Up or Key.W:
-                    _saveGamesInputManager.HandleKeyInput(e);
-                    return;
-                    
-                case Key.Down or Key.S:
-                    _saveGamesInputManager.HandleKeyInput(e);
-                    return;
-                    
-                case Key.Enter or Key.Space:
-                    if (_viewModel?.SelectedSave != null)
-                    {
-                        _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
-                        e.Handled = true;
-                        return;
-                    }
-                    break;
-                    
-                case Key.Tab:
-                    if (e.KeyModifiers.HasFlag(KeyModifiers.Shift))
-                    {
-                        // Exit save games list and go to previous control
-                        _isInSaveGamesList = false;
-                        _inputManager.SelectPrevious();
-                    }
-                    else
-                    {
-                        // Exit save games list and go to next control
-                        _isInSaveGamesList = false;
-                        _inputManager.SelectNext();
-                    }
-                    e.Handled = true;
-                    return;
-                    
-                case Key.Escape:
-                    // Exit save games list navigation
-                    _isInSaveGamesList = false;
-                    _inputManager.SelectItem(0); // Focus back to the ListBox container
-                    e.Handled = true;
-                    return;
-            }
-        }
-        else
-        {
-            // Handle loading selected save game directly from main navigation
-            if ((e.Key == Key.Enter || e.Key == Key.Space) && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
-            {
-                Logger.Debug($"OnKeyDown: Enter/Space on SaveGamesList, SelectedSave={_viewModel?.SelectedSave?.GameName ?? "null"}, HasSaveGames={_viewModel?.HasSaveGames}");
-                if (_viewModel?.SelectedSave != null)
-                {
-                    Logger.Debug($"OnKeyDown: Executing PlaySaveCommand for {_viewModel.SelectedSave.GameName}");
-                    // Load the currently selected save game directly
-                    _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
-                    e.Handled = true;
-                    return;
-                }
-                else
-                {
-                    // If no save is selected, enter sub-navigation mode
-                    _isInSaveGamesList = true;
-                    // Focus first save game
-                    if (_viewModel.SavedGames.Count > 0)
-                    {
-                        _saveGamesInputManager.SelectItem(0);
-                    }
-                    e.Handled = true;
-                    return;
-                }
+                Logger.Debug($"OnKeyDown: Executing PlaySaveCommand for {_viewModel.SelectedSave.GameName}");
+                // Load the currently selected save game directly
+                var observable = _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                observable.Subscribe(
+                    onNext: _ => Logger.Debug($"OnKeyDown: PlaySaveCommand executed successfully"),
+                    onError: ex => Logger.Debug($"OnKeyDown: PlaySaveCommand error: {ex.Message}")
+                );
+                e.Handled = true;
+                return;
             }
         }
         
@@ -567,55 +510,20 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
     
     public bool HandleGamepadInput(string input)
     {
-        // If we're in the save games list, handle navigation within it
-        if (_isInSaveGamesList)
+        // Handle loading selected save game from main navigation
+        if (input == "Confirm" && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
         {
-            switch (input)
+            Logger.Debug($"HandleGamepadInput: Confirm on SaveGamesList, SelectedSave={_viewModel?.SelectedSave?.GameName ?? "null"}, HasSaveGames={_viewModel?.HasSaveGames}");
+            if (_viewModel?.SelectedSave != null)
             {
-                case "Up":
-                case "Down":
-                    _saveGamesInputManager.HandleGamepadInput(input);
-                    return true;
-                    
-                case "Confirm":
-                    if (_viewModel?.SelectedSave != null)
-                    {
-                        _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
-                        return true;
-                    }
-                    break;
-                    
-                case "Cancel":
-                    // Exit save games list navigation
-                    _isInSaveGamesList = false;
-                    _inputManager.SelectItem(0); // Focus back to the ListBox container
-                    return true;
-            }
-        }
-        else
-        {
-            // Handle loading selected save game directly from main navigation
-            if (input == "Confirm" && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
-            {
-                Logger.Debug($"HandleGamepadInput: Confirm on SaveGamesList, SelectedSave={_viewModel?.SelectedSave?.GameName ?? "null"}, HasSaveGames={_viewModel?.HasSaveGames}");
-                if (_viewModel?.SelectedSave != null)
-                {
-                    Logger.Debug($"HandleGamepadInput: Executing PlaySaveCommand for {_viewModel.SelectedSave.GameName}");
-                    // Load the currently selected save game directly
-                    _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
-                    return true;
-                }
-                else
-                {
-                    // If no save is selected, enter sub-navigation mode
-                    _isInSaveGamesList = true;
-                    // Focus first save game
-                    if (_viewModel.SavedGames.Count > 0)
-                    {
-                        _saveGamesInputManager.SelectItem(0);
-                    }
-                    return true;
-                }
+                Logger.Debug($"HandleGamepadInput: Executing PlaySaveCommand for {_viewModel.SelectedSave.GameName}");
+                // Load the currently selected save game directly
+                var observable = _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
+                observable.Subscribe(
+                    onNext: _ => Logger.Debug($"HandleGamepadInput: PlaySaveCommand executed successfully"),
+                    onError: ex => Logger.Debug($"HandleGamepadInput: PlaySaveCommand error: {ex.Message}")
+                );
+                return true;
             }
         }
         
@@ -630,8 +538,16 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
             try
             {
                 Logger.Debug($"SaveGameButton_Click: Executing PlaySaveCommand for {saveData.GameName}");
-                _viewModel.PlaySaveCommand.Execute(saveData);
-                Logger.Debug($"SaveGameButton_Click: PlaySaveCommand.Execute completed");
+                
+                // Try async execution pattern for ReactiveCommand with parameters
+                var observable = _viewModel.PlaySaveCommand.Execute(saveData);
+                observable.Subscribe(
+                    onNext: _ => Logger.Debug($"SaveGameButton_Click: PlaySaveCommand executed successfully"),
+                    onError: ex => Logger.Debug($"SaveGameButton_Click: PlaySaveCommand error: {ex.Message}"),
+                    onCompleted: () => Logger.Debug($"SaveGameButton_Click: PlaySaveCommand completed")
+                );
+                
+                Logger.Debug($"SaveGameButton_Click: PlaySaveCommand.Execute initiated");
             }
             catch (Exception ex)
             {
