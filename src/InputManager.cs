@@ -485,6 +485,8 @@ public class InputManager
         var currentRow = currentItem.GridRow;
         var currentColumn = currentItem.GridColumn;
         
+        Logger.Debug($"SelectUp: currentRow={currentRow}, currentColumn={currentColumn}, totalItems={_selectableItems.Count}");
+        
         // Find item in row above with same or closest column
         var candidateItems = _selectableItems
             .Where(item => item.IsEnabled && item.GridRow < currentRow)
@@ -492,11 +494,22 @@ public class InputManager
             .ThenBy(item => Math.Abs(item.GridColumn - currentColumn))
             .ToList();
         
+        Logger.Debug($"SelectUp: found {candidateItems.Count} candidates");
+        foreach (var candidate in candidateItems)
+        {
+            Logger.Debug($"SelectUp: candidate row={candidate.GridRow}, col={candidate.GridColumn}, enabled={candidate.IsEnabled}, control={candidate.Control.GetType().Name}");
+        }
+        
         var targetItem = candidateItems.FirstOrDefault();
         if (targetItem != null)
         {
+            Logger.Debug($"SelectUp: selecting target at row={targetItem.GridRow}, col={targetItem.GridColumn}");
             var targetIndex = _selectableItems.IndexOf(targetItem);
             SelectItem(targetIndex);
+        }
+        else
+        {
+            Logger.Debug("SelectUp: no target item found");
         }
     }
     

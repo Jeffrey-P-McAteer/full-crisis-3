@@ -532,10 +532,10 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
             // Handle loading selected save game directly from main navigation
             if ((e.Key == Key.Enter || e.Key == Key.Space) && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
             {
-                Logger.Debug($"LoadGameView: Enter/Space pressed on SaveGamesList. SelectedSave: {_viewModel?.SelectedSave?.GameName ?? "null"}");
+                Logger.Debug($"OnKeyDown: Enter/Space on SaveGamesList, SelectedSave={_viewModel?.SelectedSave?.GameName ?? "null"}, HasSaveGames={_viewModel?.HasSaveGames}");
                 if (_viewModel?.SelectedSave != null)
                 {
-                    Logger.Info($"LoadGameView: Loading save game '{_viewModel.SelectedSave.GameName}' via keyboard");
+                    Logger.Debug($"OnKeyDown: Executing PlaySaveCommand for {_viewModel.SelectedSave.GameName}");
                     // Load the currently selected save game directly
                     _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
                     e.Handled = true;
@@ -597,10 +597,10 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
             // Handle loading selected save game directly from main navigation
             if (input == "Confirm" && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
             {
-                Logger.Debug($"LoadGameView: Gamepad Confirm pressed on SaveGamesList. SelectedSave: {_viewModel?.SelectedSave?.GameName ?? "null"}");
+                Logger.Debug($"HandleGamepadInput: Confirm on SaveGamesList, SelectedSave={_viewModel?.SelectedSave?.GameName ?? "null"}, HasSaveGames={_viewModel?.HasSaveGames}");
                 if (_viewModel?.SelectedSave != null)
                 {
-                    Logger.Info($"LoadGameView: Loading save game '{_viewModel.SelectedSave.GameName}' via gamepad");
+                    Logger.Debug($"HandleGamepadInput: Executing PlaySaveCommand for {_viewModel.SelectedSave.GameName}");
                     // Load the currently selected save game directly
                     _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
                     return true;
@@ -624,14 +624,15 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
     
     private void SaveGameButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
+        Logger.Debug($"SaveGameButton_Click: sender={sender?.GetType().Name}, hasTag={sender is Button b && b.Tag != null}, hasViewModel={_viewModel != null}");
         if (sender is Button button && button.Tag is SaveGameData saveData && _viewModel != null)
         {
-            Logger.Info($"LoadGameView: Loading save game '{saveData.GameName}' via button click");
+            Logger.Debug($"SaveGameButton_Click: Executing PlaySaveCommand for {saveData.GameName}");
             _viewModel.PlaySaveCommand.Execute(saveData);
         }
         else
         {
-            Logger.Debug("LoadGameView: SaveGameButton_Click failed - sender not button, no tag data, or no viewmodel");
+            Logger.Debug($"SaveGameButton_Click: Failed - button={sender is Button}, tag={sender is Button b2 && b2.Tag is SaveGameData}, viewModel={_viewModel != null}");
         }
     }
 }
