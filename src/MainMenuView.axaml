@@ -16,10 +16,10 @@
             Padding="40,30" 
             HorizontalAlignment="Center">
       <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="15">
-        <Button Name="NewGameButton" Content="New Game" Classes="CustomButton MenuButton" Command="{Binding NewGameCommand}" IsDefault="True" />
-        <Button Name="LoadGameButton" Content="Load Game" Classes="CustomButton MenuButton" Command="{Binding LoadGameCommand}" />
-        <Button Name="SettingsButton" Content="Settings" Classes="CustomButton MenuButton" Command="{Binding SettingsCommand}" />
-        <Button Name="QuitButton" Content="Quit" Classes="CustomButton MenuButton" Command="{Binding QuitCommand}" />
+        <Button Name="NewGameButton" Content="New Game" Background="#FF2E7D32" Classes="CustomButton MenuButton" Command="{Binding NewGameCommand}" IsDefault="True" />
+        <Button Name="LoadGameButton" Content="Load Game" Background="#FF1976D2" Classes="CustomButton MenuButton" Command="{Binding LoadGameCommand}" />
+        <Button Name="SettingsButton" Content="Settings" Background="#FFF57C00" Classes="CustomButton MenuButton" Command="{Binding SettingsCommand}" />
+        <Button Name="QuitButton" Content="Quit" Background="#FFD32F2F" Classes="CustomButton MenuButton" Command="{Binding QuitCommand}" />
       </StackPanel>
     </Border>
   </Grid>

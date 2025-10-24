@@ -75,6 +75,35 @@
       <Setter Property="MinWidth" Value="120" />
     </Style>
     
+    <!-- Individual menu button hover effects -->
+    <Style Selector="Button#NewGameButton:pointerover">
+      <Setter Property="Background" Value="#FF388E3C" />
+    </Style>
+    <Style Selector="Button#NewGameButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FF388E3C" />
+    </Style>
+    
+    <Style Selector="Button#LoadGameButton:pointerover">
+      <Setter Property="Background" Value="#FF1E88E5" />
+    </Style>
+    <Style Selector="Button#LoadGameButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FF1E88E5" />
+    </Style>
+    
+    <Style Selector="Button#SettingsButton:pointerover">
+      <Setter Property="Background" Value="#FFF9A825" />
+    </Style>
+    <Style Selector="Button#SettingsButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FFF9A825" />
+    </Style>
+    
+    <Style Selector="Button#QuitButton:pointerover">
+      <Setter Property="Background" Value="#FFE53935" />
+    </Style>
+    <Style Selector="Button#QuitButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FFE53935" />
+    </Style>
+    
     <!-- Back button specific styling -->
     <Style Selector="Button.BackButton">
       <Setter Property="FontSize" Value="18" />
