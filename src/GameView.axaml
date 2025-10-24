@@ -132,5 +132,33 @@
       </Border>
       
     </Grid>
+    
+    <!-- Quit Dialog Overlay -->
+    <Border Grid.RowSpan="2" Grid.ColumnSpan="3" Background="#80000000" 
+            IsVisible="{Binding ShowQuitDialog}" ZIndex="1000">
+      <Border Background="#FF2A3B47" BorderBrush="#FF6B7280" BorderThickness="2" 
+              CornerRadius="15" Padding="30" HorizontalAlignment="Center" VerticalAlignment="Center"
+              MinWidth="350" MinHeight="200">
+        <StackPanel Spacing="20" HorizontalAlignment="Center">
+          <TextBlock Text="Save before quitting?" FontSize="20" Foreground="White" 
+                     HorizontalAlignment="Center" FontWeight="Bold" />
+          <TextBlock Text="You have unsaved progress that will be lost." 
+                     FontSize="14" Foreground="#FFCCCCCC" HorizontalAlignment="Center"
+                     TextWrapping="Wrap" TextAlignment="Center" />
+          
+          <StackPanel Orientation="Horizontal" Spacing="15" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <Button x:Name="SaveAndQuitDialogButton" Content="Save &amp; Quit" Background="#FF4CAF50" 
+                    Classes="CustomButton QuitDialogButton" FontSize="14" Padding="15,8" MinWidth="110"
+                    Command="{Binding SaveAndQuitCommand}" />
+            <Button x:Name="QuitWithoutSavingButton" Content="Quit Without Saving" Background="#FFD32F2F" 
+                    Classes="CustomButton QuitDialogButton" FontSize="14" Padding="15,8" MinWidth="140"
+                    Command="{Binding ConfirmQuitCommand}" />
+            <Button x:Name="CancelQuitButton" Content="Cancel" Background="#FF6B7280" 
+                    Classes="CustomButton QuitDialogButton" FontSize="14" Padding="15,8" MinWidth="80"
+                    Command="{Binding CancelQuitCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
   </Grid>
 </UserControl>
