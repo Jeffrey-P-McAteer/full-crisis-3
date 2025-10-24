@@ -627,8 +627,17 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
         Logger.Debug($"SaveGameButton_Click: sender={sender?.GetType().Name}, hasTag={sender is Button b && b.Tag != null}, hasViewModel={_viewModel != null}");
         if (sender is Button button && button.Tag is SaveGameData saveData && _viewModel != null)
         {
-            Logger.Debug($"SaveGameButton_Click: Executing PlaySaveCommand for {saveData.GameName}");
-            _viewModel.PlaySaveCommand.Execute(saveData);
+            try
+            {
+                Logger.Debug($"SaveGameButton_Click: Executing PlaySaveCommand for {saveData.GameName}");
+                _viewModel.PlaySaveCommand.Execute(saveData);
+                Logger.Debug($"SaveGameButton_Click: PlaySaveCommand.Execute completed");
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug($"SaveGameButton_Click: Exception during PlaySaveCommand.Execute: {ex.Message}");
+                Logger.Debug($"SaveGameButton_Click: Exception details: {ex}");
+            }
         }
         else
         {

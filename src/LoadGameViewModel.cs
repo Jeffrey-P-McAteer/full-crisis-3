@@ -16,6 +16,8 @@ public class LoadGameViewModel : ViewModelBase
     
     public LoadGameViewModel()
     {
+        Logger.Debug($"LoadGameViewModel: Constructor called, instance ID: {GetHashCode()}");
+        
         // Commands
         PlaySaveCommand = ReactiveCommand.Create<SaveGameData?>(PlaySave);
         DeleteSelectedCommand = ReactiveCommand.Create(DeleteSelected, this.WhenAnyValue(x => x.SelectedSave).Select(save => save != null));
@@ -87,6 +89,8 @@ public class LoadGameViewModel : ViewModelBase
     
     private void PlaySave(SaveGameData? saveData)
     {
+        Logger.Debug($"PlaySave: Method called with saveData={(saveData != null ? saveData.GameName : "null")}");
+        
         if (saveData == null)
         {
             Logger.Info("PlaySave: No save data provided");
