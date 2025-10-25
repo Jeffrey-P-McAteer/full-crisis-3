@@ -360,7 +360,24 @@ public class MainWindowViewModel : ViewModelBase
             if (focusManager == null) return false;
 
             var currentFocus = focusManager.GetFocusedElement();
-            if (currentFocus == null) return false;
+            
+            // If no element is focused, focus the first focusable element
+            if (currentFocus == null)
+            {
+                Logger.Debug("SimulateTabNavigation: No element focused, attempting to focus first focusable element");
+                
+                // Try to move focus to the first focusable element
+                var firstFocusable = FindFirstFocusableElement(mainWindow);
+                if (firstFocusable != null)
+                {
+                    firstFocusable.Focus();
+                    Logger.Debug($"SimulateTabNavigation: Focused first element: {firstFocusable.GetType().Name}");
+                    return true;
+                }
+                
+                Logger.Debug("SimulateTabNavigation: No focusable elements found");
+                return false;
+            }
 
             // Create a realistic Tab key event exactly as if Tab was pressed
             var keyEventArgs = new KeyEventArgs
@@ -407,7 +424,27 @@ public class MainWindowViewModel : ViewModelBase
             if (focusManager == null) return false;
 
             var currentFocus = focusManager.GetFocusedElement();
-            if (currentFocus == null) return false;
+            
+            // If no element is focused, focus the first focusable element
+            if (currentFocus == null)
+            {
+                Logger.Debug("SimulateEnterKey: No element focused, attempting to focus first focusable element");
+                
+                // Try to move focus to the first focusable element
+                var firstFocusable = FindFirstFocusableElement(mainWindow);
+                if (firstFocusable != null)
+                {
+                    firstFocusable.Focus();
+                    Logger.Debug($"SimulateEnterKey: Focused first element: {firstFocusable.GetType().Name}");
+                    // Now simulate Enter on the newly focused element
+                    currentFocus = firstFocusable;
+                }
+                else
+                {
+                    Logger.Debug("SimulateEnterKey: No focusable elements found");
+                    return false;
+                }
+            }
 
             // Create a realistic Enter key event exactly as if Enter was pressed
             var keyEventArgs = new KeyEventArgs
@@ -437,6 +474,57 @@ public class MainWindowViewModel : ViewModelBase
         }
         
         return false;
+    }
+
+    private Control? FindFirstFocusableElement(Window window)
+    {
+        try
+        {
+            // Recursively search for the first focusable control in the visual tree
+            return FindFirstFocusableElementRecursive(window);
+        }
+        catch (Exception ex)
+        {
+            Logger.Debug($"FindFirstFocusableElement: Error finding focusable element: {ex.Message}");
+            return null;
+        }
+    }
+
+    private Control? FindFirstFocusableElementRecursive(Control parent)
+    {
+        // Check if the current control is focusable
+        if (parent.Focusable && parent.IsEnabled && parent.IsVisible && parent.IsEffectivelyVisible)
+        {
+            // Prefer interactive controls
+            if (parent is Button or TextBox or ComboBox or CheckBox or ListBox)
+            {
+                return parent;
+            }
+        }
+
+        // Search children using logical tree
+        if (parent.GetLogicalChildren() != null)
+        {
+            foreach (var child in parent.GetLogicalChildren())
+            {
+                if (child is Control childControl)
+                {
+                    var focusable = FindFirstFocusableElementRecursive(childControl);
+                    if (focusable != null)
+                    {
+                        return focusable;
+                    }
+                }
+            }
+        }
+
+        // If no interactive control found, return the first focusable control
+        if (parent.Focusable && parent.IsEnabled && parent.IsVisible && parent.IsEffectivelyVisible)
+        {
+            return parent;
+        }
+
+        return null;
     }
 
     private IGamepadNavigable? FindGamepadNavigableView()

@@ -274,7 +274,6 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
     private readonly InputManager _saveGamesInputManager = new();
     private LoadGameViewModel? _viewModel;
     private ListBox? _saveGamesList;
-    private bool _isInSaveGamesList = false;
     
     public LoadGameView()
     {
