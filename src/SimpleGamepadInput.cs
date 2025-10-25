@@ -361,6 +361,8 @@ public class SimpleGamepadInput : IDisposable
                 1 => "Cancel",   // B button (button 1 on Xbox controllers) 
                 2 => null,       // X button (button 2) - not mapped
                 3 => null,       // Y button (button 3) - not mapped
+                4 => "LeftButton", // LB
+                5 => "RightButton", // RB
                 _ => null
             };
 

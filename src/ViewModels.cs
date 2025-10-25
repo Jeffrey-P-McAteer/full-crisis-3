@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Reactive;
 using Avalonia.Threading;
 using Avalonia.LogicalTree;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Controls;
 
 namespace FullCrisis3;
 
@@ -286,9 +289,32 @@ public class MainWindowViewModel : ViewModelBase
             }
             else
             {
-                // Try to forward to current view first
+                // Convert Left/Right gamepad inputs to Tab/Shift+Tab for PC-style navigation
                 bool handled = false;
-                if (CurrentView != null)
+                switch (input)
+                {
+                    case "Left":
+                        // Simulate Shift+Tab (navigate backward)
+                        handled = SimulateTabNavigation(shift: true);
+                        break;
+                    case "Right":
+                        // Simulate Tab (navigate forward)
+                        handled = SimulateTabNavigation(shift: false);
+                        break;
+                    case "LeftButton":
+                        // LB button - Simulate Shift+Tab (navigate backward)
+                        Logger.Debug("LeftButton (LB) pressed - simulating Shift+Tab navigation");
+                        handled = SimulateTabNavigation(shift: true);
+                        break;
+                    case "RightButton":
+                        // RB button - Simulate Tab (navigate forward)
+                        Logger.Debug("RightButton (RB) pressed - simulating Tab navigation");
+                        handled = SimulateTabNavigation(shift: false);
+                        break;
+                }
+
+                // If not handled by Tab simulation, try to forward to current view
+                if (!handled && CurrentView != null)
                 {
                     // Find the associated UserControl for the current view model
                     var gamepadNavigableView = FindGamepadNavigableView();
@@ -310,6 +336,47 @@ public class MainWindowViewModel : ViewModelBase
                 }
             }
         });
+    }
+
+    private bool SimulateTabNavigation(bool shift)
+    {
+        try
+        {
+            // Get the current focused element from the main window
+            if (Avalonia.Application.Current?.ApplicationLifetime is not Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+                return false;
+                
+            var mainWindow = desktop.MainWindow;
+            if (mainWindow == null) return false;
+            
+            var focusManager = mainWindow.FocusManager;
+            if (focusManager == null) return false;
+
+            var currentFocus = focusManager.GetFocusedElement();
+            if (currentFocus == null) return false;
+
+            // Create a KeyEventArgs for Tab/Shift+Tab
+            var key = Key.Tab;
+            var modifiers = shift ? KeyModifiers.Shift : KeyModifiers.None;
+            
+            // Create key event
+            var keyEventArgs = new KeyEventArgs
+            {
+                Key = key,
+                KeyModifiers = modifiers,
+                RoutedEvent = InputElement.KeyDownEvent
+            };
+            
+            // Send the key event to trigger focus navigation
+            mainWindow.RaiseEvent(keyEventArgs);
+            return keyEventArgs.Handled;
+        }
+        catch (Exception ex)
+        {
+            Logger.Debug($"SimulateTabNavigation: Error simulating tab navigation: {ex.Message}");
+        }
+        
+        return false;
     }
 
     private IGamepadNavigable? FindGamepadNavigableView()
