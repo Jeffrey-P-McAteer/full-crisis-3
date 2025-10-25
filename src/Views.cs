@@ -26,10 +26,22 @@ public partial class MainWindow : Window
         // Configure window manager hints for better tiling WM support
         ConfigureWindowManagerHints();
         
-        // Watch for background theme changes
+        // Watch for quit dialog visibility and background theme changes
         viewModel.PropertyChanged += (s, e) => 
         {
-            if (e.PropertyName == nameof(MainWindowViewModel.CurrentBackgroundTheme))
+            if (e.PropertyName == nameof(MainWindowViewModel.IsQuitDialogVisible))
+            {
+                if (viewModel.IsQuitDialogVisible)
+                {
+                    // Focus the first button when quit dialog appears
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                    {
+                        var quitButton = this.FindControl<Button>("QuitButton");
+                        quitButton?.Focus();
+                    }, Avalonia.Threading.DispatcherPriority.Background);
+                }
+            }
+            else if (e.PropertyName == nameof(MainWindowViewModel.CurrentBackgroundTheme))
             {
                 UpdateBackgroundTheme(viewModel.CurrentBackgroundTheme);
             }
