@@ -289,7 +289,7 @@ public class MainWindowViewModel : ViewModelBase
             }
             else
             {
-                // Convert Left/Right gamepad inputs to Tab/Shift+Tab for PC-style navigation
+                // Convert gamepad inputs to keyboard equivalents for consistent PC-style navigation
                 bool handled = false;
                 switch (input)
                 {
@@ -311,9 +311,14 @@ public class MainWindowViewModel : ViewModelBase
                         Logger.Debug("RightButton (RB) pressed - simulating Tab navigation");
                         handled = SimulateTabNavigation(shift: false);
                         break;
+                    case "Confirm":
+                        // A button - Simulate Enter key
+                        Logger.Debug("Confirm (A button) pressed - simulating Enter key");
+                        handled = SimulateEnterKey();
+                        break;
                 }
 
-                // If not handled by Tab simulation, try to forward to current view
+                // If not handled by Tab/Enter simulation, try to forward to current view
                 if (!handled && CurrentView != null)
                 {
                     // Find the associated UserControl for the current view model
@@ -329,7 +334,9 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     switch (input)
                     {
-                        case "Cancel": 
+                        case "Cancel":
+                            // B button - Handle as Escape key
+                            Logger.Debug("Cancel (B button) pressed - handling as Escape key");
                             HandleEscapeKey(); 
                             break;
                     }
@@ -374,6 +381,43 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             Logger.Debug($"SimulateTabNavigation: Error simulating tab navigation: {ex.Message}");
+        }
+        
+        return false;
+    }
+
+    private bool SimulateEnterKey()
+    {
+        try
+        {
+            // Get the current focused element from the main window
+            if (Avalonia.Application.Current?.ApplicationLifetime is not Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+                return false;
+                
+            var mainWindow = desktop.MainWindow;
+            if (mainWindow == null) return false;
+            
+            var focusManager = mainWindow.FocusManager;
+            if (focusManager == null) return false;
+
+            var currentFocus = focusManager.GetFocusedElement();
+            if (currentFocus == null) return false;
+
+            // Create key event for Enter
+            var keyEventArgs = new KeyEventArgs
+            {
+                Key = Key.Enter,
+                KeyModifiers = KeyModifiers.None,
+                RoutedEvent = InputElement.KeyDownEvent
+            };
+            
+            // Send the key event to trigger Enter behavior
+            mainWindow.RaiseEvent(keyEventArgs);
+            return keyEventArgs.Handled;
+        }
+        catch (Exception ex)
+        {
+            Logger.Debug($"SimulateEnterKey: Error simulating enter key: {ex.Message}");
         }
         
         return false;
