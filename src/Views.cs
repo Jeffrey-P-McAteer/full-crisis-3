@@ -215,15 +215,9 @@ public partial class MainWindow : Window
 [AutoLog]
 public partial class MainMenuView : UserControl, IGamepadNavigable
 {
-    private Button[] _buttons = Array.Empty<Button>();
-    private int _selectedIndex = 0;
-    private readonly InputManager _inputManager = new();
-
     public MainMenuView()
     {
         InitializeComponent();
-        Loaded += (s, e) => SetupButtons();
-        KeyDown += OnKeyDown;
         
         // Wire up the focus restoration callback
         DataContextChanged += (s, e) =>
@@ -235,54 +229,17 @@ public partial class MainMenuView : UserControl, IGamepadNavigable
         };
     }
 
-    private void SetupButtons()
-    {
-        _buttons = new[]
-        {
-            this.FindControl<Button>("NewGameButton")!,
-            this.FindControl<Button>("LoadGameButton")!,
-            this.FindControl<Button>("SettingsButton")!,
-            this.FindControl<Button>("QuitButton")!
-        };
-
-        // Setup InputManager for main menu
-        _inputManager.ClearSelectables();
-        _inputManager.SetGridNavigation(true);
-        
-        for (int i = 0; i < _buttons.Length; i++)
-        {
-            var index = i;
-            var button = _buttons[i];
-            
-            _inputManager.RegisterSelectable(
-                button, 
-                tabIndex: i,
-                gridRow: i,
-                gridColumn: 0,
-                onSelected: item => _selectedIndex = index
-            );
-        }
-
-        if (_buttons.Length > 0) _inputManager.SelectItem(0);
-    }
-
-    private void OnKeyDown(object? sender, KeyEventArgs e)
-    {
-        _inputManager.HandleKeyInput(e);
-    }
-
     public void FocusQuitButton()
     {
-        if (_buttons.Length > 3) // Quit button is at index 3
-        {
-            _selectedIndex = 3;
-            _inputManager.SelectItem(3);
-        }
+        // Focus the quit button directly using the new Tab navigation system
+        var quitButton = this.FindControl<Button>("QuitButton");
+        quitButton?.Focus();
     }
 
     public bool HandleGamepadInput(string input)
     {
-        return _inputManager.HandleGamepadInput(input);
+        // Return false to let the Tab simulation system handle all gamepad input
+        return false;
     }
 }
 
@@ -298,44 +255,15 @@ public partial class SubMenuView : UserControl
 [AutoLog]
 public partial class SettingsView : UserControl, IGamepadNavigable
 {
-    private readonly InputManager _inputManager = new();
-
     public SettingsView()
     {
         InitializeComponent();
-        Loaded += (s, e) => SetupControls();
-        KeyDown += OnKeyDown;
-    }
-
-    private void SetupControls()
-    {
-        var controls = new Control[]
-        {
-            this.FindControl<CheckBox>("AudioEnabledCheckBox")!,
-            this.FindControl<CheckBox>("BackgroundMusicCheckBox")!,
-            this.FindControl<Button>("BackButton")!
-        };
-
-        _inputManager.ClearSelectables();
-        _inputManager.SetGridNavigation(true);
-        
-        // Settings controls in a vertical layout
-        for (int i = 0; i < controls.Length; i++)
-        {
-            _inputManager.RegisterSelectable(controls[i], tabIndex: i, gridRow: i, gridColumn: 0);
-        }
-
-        if (controls.Length > 0) _inputManager.SelectItem(0);
-    }
-
-    private void OnKeyDown(object? sender, KeyEventArgs e)
-    {
-        _inputManager.HandleKeyInput(e);
     }
 
     public bool HandleGamepadInput(string input)
     {
-        return _inputManager.HandleGamepadInput(input);
+        // Return false to let the Tab simulation system handle all gamepad input
+        return false;
     }
 }
 
@@ -510,14 +438,13 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
     
     public bool HandleGamepadInput(string input)
     {
-        // Handle loading selected save game from main navigation
+        // Handle loading selected save game when A is pressed on the save games list
         if (input == "Confirm" && _saveGamesList?.IsFocused == true && _viewModel?.HasSaveGames == true)
         {
-            Logger.Debug($"HandleGamepadInput: Confirm on SaveGamesList, SelectedSave={_viewModel?.SelectedSave?.GameName ?? "null"}, HasSaveGames={_viewModel?.HasSaveGames}");
+            Logger.Debug($"HandleGamepadInput: Confirm on SaveGamesList, SelectedSave={_viewModel?.SelectedSave?.GameName ?? "null"}");
             if (_viewModel?.SelectedSave != null)
             {
                 Logger.Debug($"HandleGamepadInput: Executing PlaySaveCommand for {_viewModel.SelectedSave.GameName}");
-                // Load the currently selected save game directly
                 var observable = _viewModel.PlaySaveCommand.Execute(_viewModel.SelectedSave);
                 observable.Subscribe(
                     onNext: _ => Logger.Debug($"HandleGamepadInput: PlaySaveCommand executed successfully"),
@@ -527,7 +454,8 @@ public partial class LoadGameView : UserControl, IGamepadNavigable
             }
         }
         
-        return _inputManager.HandleGamepadInput(input);
+        // Return false to let the Tab simulation system handle all other gamepad input
+        return false;
     }
     
     private void SaveGameButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
