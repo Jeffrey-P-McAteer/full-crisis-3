@@ -275,6 +275,8 @@ public class MainWindowViewModel : ViewModelBase
             {
                 switch (input)
                 {
+                    case "Up":
+                    case "Down":
                     case "Left":
                     case "Right":
                     case "LeftButton":
@@ -295,13 +297,25 @@ public class MainWindowViewModel : ViewModelBase
                 bool handled = false;
                 switch (input)
                 {
+                    case "Up":
+                        // Simulate Up arrow key
+                        Logger.Debug("Up (D-pad up) pressed - simulating Up arrow key");
+                        handled = SimulateArrowKey(Key.Up);
+                        break;
+                    case "Down":
+                        // Simulate Down arrow key
+                        Logger.Debug("Down (D-pad down) pressed - simulating Down arrow key");
+                        handled = SimulateArrowKey(Key.Down);
+                        break;
                     case "Left":
-                        // Simulate Shift+Tab (navigate backward)
-                        handled = SimulateTabNavigation(shift: true);
+                        // Simulate Left arrow key
+                        Logger.Debug("Left (D-pad left) pressed - simulating Left arrow key");
+                        handled = SimulateArrowKey(Key.Left);
                         break;
                     case "Right":
-                        // Simulate Tab (navigate forward)
-                        handled = SimulateTabNavigation(shift: false);
+                        // Simulate Right arrow key
+                        Logger.Debug("Right (D-pad right) pressed - simulating Right arrow key");
+                        handled = SimulateArrowKey(Key.Right);
                         break;
                     case "LeftButton":
                         // LB button - Simulate Shift+Tab (navigate backward)
@@ -473,6 +487,73 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             Logger.Debug($"SimulateEnterKey: Error simulating enter key: {ex.Message}");
+        }
+        
+        return false;
+    }
+
+    private bool SimulateArrowKey(Key arrowKey)
+    {
+        try
+        {
+            // Get the current focused element from the main window
+            if (Avalonia.Application.Current?.ApplicationLifetime is not Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+                return false;
+                
+            var mainWindow = desktop.MainWindow;
+            if (mainWindow == null) return false;
+            
+            var focusManager = mainWindow.FocusManager;
+            if (focusManager == null) return false;
+
+            var currentFocus = focusManager.GetFocusedElement();
+            
+            // If no element is focused, focus the first focusable element
+            if (currentFocus == null)
+            {
+                Logger.Debug($"SimulateArrowKey: No element focused, attempting to focus first focusable element");
+                
+                // Try to move focus to the first focusable element
+                var firstFocusable = FindFirstFocusableElement(mainWindow);
+                if (firstFocusable != null)
+                {
+                    firstFocusable.Focus();
+                    Logger.Debug($"SimulateArrowKey: Focused first element: {firstFocusable.GetType().Name}");
+                    // Now simulate arrow key on the newly focused element
+                    currentFocus = firstFocusable;
+                }
+                else
+                {
+                    Logger.Debug("SimulateArrowKey: No focusable elements found");
+                    return false;
+                }
+            }
+
+            // Create a realistic arrow key event exactly as if the arrow key was pressed
+            var keyEventArgs = new KeyEventArgs
+            {
+                Key = arrowKey,
+                KeyModifiers = KeyModifiers.None,
+                RoutedEvent = InputElement.KeyDownEvent,
+                Source = currentFocus
+            };
+            
+            // Send the arrow key event to the focused element first, then let it bubble up
+            if (currentFocus is InputElement inputElement)
+            {
+                inputElement.RaiseEvent(keyEventArgs);
+                Logger.Debug($"SimulateArrowKey: {arrowKey} event sent to {currentFocus.GetType().Name}, handled: {keyEventArgs.Handled}");
+                return keyEventArgs.Handled;
+            }
+
+            // Fallback: send to main window
+            mainWindow.RaiseEvent(keyEventArgs);
+            Logger.Debug($"SimulateArrowKey: {arrowKey} event sent to MainWindow, handled: {keyEventArgs.Handled}");
+            return keyEventArgs.Handled;
+        }
+        catch (Exception ex)
+        {
+            Logger.Debug($"SimulateArrowKey: Error simulating {arrowKey} key: {ex.Message}");
         }
         
         return false;
