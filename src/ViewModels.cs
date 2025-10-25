@@ -277,6 +277,8 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     case "Left":
                     case "Right":
+                    case "LeftButton":
+                    case "RightButton":
                         QuitDialogNavigation?.Invoke(input);
                         break;
                     case "Confirm":

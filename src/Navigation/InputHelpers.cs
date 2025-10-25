@@ -77,10 +77,6 @@ public static class InputHelpers
     {
         return gamepadInput switch
         {
-            "Up" => NavigationDirection.Up,
-            "Down" => NavigationDirection.Down,
-            "Left" => NavigationDirection.Left,
-            "Right" => NavigationDirection.Right,
             _ => null
         };
     }

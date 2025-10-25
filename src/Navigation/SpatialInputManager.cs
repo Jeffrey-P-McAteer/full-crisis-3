@@ -346,12 +346,6 @@ public class SpatialInputManager
     {
         SetInputType(FullCrisis3.InputManager.InputType.Gamepad);
 
-        var direction = InputHelpers.GetNavigationDirection(input);
-        if (direction.HasValue)
-        {
-            return HandleDirection(direction.Value, KeyModifiers.None);
-        }
-
         switch (input)
         {
             case "Confirm":

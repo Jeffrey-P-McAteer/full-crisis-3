@@ -215,15 +215,6 @@ public abstract class NavigableViewBase : UserControl, IGamepadNavigable
                 
                 case "Cancel":
                     return HandleCancelInput();
-                
-                default:
-                    // Handle directional input
-                    var direction = InputHelpers.GetNavigationDirection(input);
-                    if (direction.HasValue)
-                    {
-                        return HandleNavigationDirection(direction.Value, KeyModifiers.None);
-                    }
-                    break;
             }
 
             // Fallback to InputManager

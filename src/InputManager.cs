@@ -253,50 +253,6 @@ public class InputManager
 
         switch (input)
         {
-            case "Up":
-                if (_useGridNavigation)
-                {
-                    SelectUp();
-                }
-                else
-                {
-                    SelectPrevious();
-                }
-                return true;
-                
-            case "Left":
-                if (_useGridNavigation)
-                {
-                    SelectLeft();
-                }
-                else
-                {
-                    SelectPrevious();
-                }
-                return true;
-
-            case "Down":
-                if (_useGridNavigation)
-                {
-                    SelectDown();
-                }
-                else
-                {
-                    SelectNext();
-                }
-                return true;
-
-            case "Right":
-                if (_useGridNavigation)
-                {
-                    SelectRight();
-                }
-                else
-                {
-                    SelectNext();
-                }
-                return true;
-
             case "Confirm":
                 ActivateSelected();
                 return true;
@@ -319,55 +275,6 @@ public class InputManager
                 if (comboBox.IsDropDownOpen)
                 {
                     comboBox.IsDropDownOpen = false;
-                    return true;
-                }
-                break;
-                
-            case "Up":
-                if (comboBox.IsDropDownOpen)
-                {
-                    // Navigate up in dropdown
-                    var currentIndex = comboBox.SelectedIndex;
-                    if (currentIndex > 0)
-                    {
-                        comboBox.SelectedIndex = currentIndex - 1;
-                    }
-                    return true;
-                }
-                else
-                {
-                    // Navigate to previous control
-                    SelectUp();
-                    return true;
-                }
-                
-            case "Down":
-                if (comboBox.IsDropDownOpen)
-                {
-                    // Navigate down in dropdown
-                    var currentIndex = comboBox.SelectedIndex;
-                    if (currentIndex < comboBox.ItemCount - 1)
-                    {
-                        comboBox.SelectedIndex = currentIndex + 1;
-                    }
-                    return true;
-                }
-                else
-                {
-                    // Navigate to next control
-                    SelectDown();
-                    return true;
-                }
-                
-            case "Left":
-            case "Right":
-                if (!comboBox.IsDropDownOpen)
-                {
-                    // Navigate to adjacent controls when dropdown is closed
-                    if (input == "Left")
-                        SelectLeft();
-                    else
-                        SelectRight();
                     return true;
                 }
                 break;
