@@ -362,20 +362,26 @@ public class MainWindowViewModel : ViewModelBase
             var currentFocus = focusManager.GetFocusedElement();
             if (currentFocus == null) return false;
 
-            // Create a KeyEventArgs for Tab/Shift+Tab
-            var key = Key.Tab;
-            var modifiers = shift ? KeyModifiers.Shift : KeyModifiers.None;
-            
-            // Create key event
+            // Create a realistic Tab key event exactly as if Tab was pressed
             var keyEventArgs = new KeyEventArgs
             {
-                Key = key,
-                KeyModifiers = modifiers,
-                RoutedEvent = InputElement.KeyDownEvent
+                Key = Key.Tab,
+                KeyModifiers = shift ? KeyModifiers.Shift : KeyModifiers.None,
+                RoutedEvent = InputElement.KeyDownEvent,
+                Source = currentFocus
             };
             
-            // Send the key event to trigger focus navigation
+            // Send the Tab key event to the focused element first, then let it bubble up
+            if (currentFocus is InputElement inputElement)
+            {
+                inputElement.RaiseEvent(keyEventArgs);
+                Logger.Debug($"SimulateTabNavigation: {(shift ? "Shift+Tab" : "Tab")} event sent to {currentFocus.GetType().Name}, handled: {keyEventArgs.Handled}");
+                return keyEventArgs.Handled;
+            }
+
+            // Fallback: send to main window
             mainWindow.RaiseEvent(keyEventArgs);
+            Logger.Debug($"SimulateTabNavigation: {(shift ? "Shift+Tab" : "Tab")} event sent to MainWindow, handled: {keyEventArgs.Handled}");
             return keyEventArgs.Handled;
         }
         catch (Exception ex)
@@ -403,16 +409,26 @@ public class MainWindowViewModel : ViewModelBase
             var currentFocus = focusManager.GetFocusedElement();
             if (currentFocus == null) return false;
 
-            // Create key event for Enter
+            // Create a realistic Enter key event exactly as if Enter was pressed
             var keyEventArgs = new KeyEventArgs
             {
                 Key = Key.Enter,
                 KeyModifiers = KeyModifiers.None,
-                RoutedEvent = InputElement.KeyDownEvent
+                RoutedEvent = InputElement.KeyDownEvent,
+                Source = currentFocus
             };
             
-            // Send the key event to trigger Enter behavior
+            // Send the Enter key event to the focused element first, then let it bubble up
+            if (currentFocus is InputElement inputElement)
+            {
+                inputElement.RaiseEvent(keyEventArgs);
+                Logger.Debug($"SimulateEnterKey: Enter event sent to {currentFocus.GetType().Name}, handled: {keyEventArgs.Handled}");
+                return keyEventArgs.Handled;
+            }
+
+            // Fallback: send to main window
             mainWindow.RaiseEvent(keyEventArgs);
+            Logger.Debug($"SimulateEnterKey: Enter event sent to MainWindow, handled: {keyEventArgs.Handled}");
             return keyEventArgs.Handled;
         }
         catch (Exception ex)
