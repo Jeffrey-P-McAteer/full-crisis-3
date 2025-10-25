@@ -15,37 +15,21 @@ public interface IGamepadNavigable
 [AutoLog]
 public partial class MainWindow : Window
 {
-    private Button[] _quitDialogButtons = Array.Empty<Button>();
-    private int _quitDialogSelectedIndex = 0;
-    private readonly InputManager _quitDialogInputManager = new();
 
     public MainWindow()
     {
         InitializeComponent();
         var viewModel = new MainWindowViewModel();
-        viewModel.QuitDialogNavigation = HandleGamepadQuitDialogNavigation;
         DataContext = viewModel;
-        Loaded += (s, e) => SetupQuitDialogButtons();
         Loaded += this.OnWindowLoaded;
         
         // Configure window manager hints for better tiling WM support
         ConfigureWindowManagerHints();
         
-        // Watch for quit dialog visibility changes to set initial focus
+        // Watch for background theme changes
         viewModel.PropertyChanged += (s, e) => 
         {
-            if (e.PropertyName == nameof(MainWindowViewModel.IsQuitDialogVisible))
-            {
-                if (viewModel.IsQuitDialogVisible)
-                {
-                    SetInitialQuitDialogFocus();
-                }
-                else
-                {
-                    RestoreFocusAfterQuitDialog();
-                }
-            }
-            else if (e.PropertyName == nameof(MainWindowViewModel.CurrentBackgroundTheme))
+            if (e.PropertyName == nameof(MainWindowViewModel.CurrentBackgroundTheme))
             {
                 UpdateBackgroundTheme(viewModel.CurrentBackgroundTheme);
             }
@@ -106,39 +90,12 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SetupQuitDialogButtons()
-    {
-        _quitDialogButtons = new[]
-        {
-            this.FindControl<Button>("QuitButton")!,
-            this.FindControl<Button>("KeepPlayingButton")!
-        };
-
-        // Setup InputManager for quit dialog
-        _quitDialogInputManager.ClearSelectables();
-        
-        for (int i = 0; i < _quitDialogButtons.Length; i++)
-        {
-            var index = i;
-            var button = _quitDialogButtons[i];
-            
-            _quitDialogInputManager.RegisterSelectable(
-                button, 
-                tabIndex: i,
-                onSelected: item => _quitDialogSelectedIndex = index
-            );
-        }
-    }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
         if (DataContext is MainWindowViewModel vm)
         {
-            if (vm.IsQuitDialogVisible)
-            {
-                HandleQuitDialogNavigation(e);
-            }
-            else if (e.Key == Key.Escape)
+            if (e.Key == Key.Escape)
             {
                 vm.HandleEscapeKey();
                 e.Handled = true;
@@ -147,57 +104,9 @@ public partial class MainWindow : Window
         base.OnKeyDown(e);
     }
 
-    private void HandleQuitDialogNavigation(KeyEventArgs e)
-    {
-        // Handle escape key specifically
-        if (e.Key == Key.Escape)
-        {
-            if (DataContext is MainWindowViewModel vm)
-            {
-                vm.CancelQuitCommand.Execute(Unit.Default);
-                e.Handled = true;
-            }
-            return;
-        }
 
-        // Let InputManager handle all other navigation
-        if (_quitDialogInputManager.HandleKeyInput(e))
-        {
-            // InputManager handled the key
-            return;
-        }
-    }
 
-    private void SetInitialQuitDialogFocus()
-    {
-        if (_quitDialogButtons.Length > 0)
-        {
-            _quitDialogSelectedIndex = 0; // Start with first button (Quit)
-            _quitDialogInputManager.SelectItem(0);
-        }
-    }
 
-    private void RestoreFocusAfterQuitDialog()
-    {
-        // Try to focus the quit button in the main menu after a short delay
-        // This allows the UI to update and the MainMenuView to be available
-        if (DataContext is MainWindowViewModel vm && vm.CurrentView is MainMenuViewModel mainMenuVM)
-        {
-            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-            {
-                // Set focus back to quit button using the callback we added to MainMenuViewModel
-                if (mainMenuVM.RestoreFocusToQuit != null)
-                {
-                    mainMenuVM.RestoreFocusToQuit.Invoke();
-                }
-            }, Avalonia.Threading.DispatcherPriority.Background);
-        }
-    }
-
-    private void HandleGamepadQuitDialogNavigation(string input)
-    {
-        _quitDialogInputManager.HandleGamepadInput(input);
-    }
     
     private void UpdateBackgroundTheme(BackgroundThemeConfig? newTheme)
     {

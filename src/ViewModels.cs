@@ -149,7 +149,6 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ConfirmQuitCommand { get; }
     public ReactiveCommand<Unit, Unit> CancelQuitCommand { get; }
     
-    public Action<string>? QuitDialogNavigation { get; set; }
 
     public MainWindowViewModel()
     {
@@ -273,18 +272,36 @@ public class MainWindowViewModel : ViewModelBase
         {
             if (IsQuitDialogVisible)
             {
+                bool handled = false;
                 switch (input)
                 {
                     case "Up":
+                        Logger.Debug("Up (D-pad up) pressed in quit dialog - simulating Up arrow key");
+                        handled = SimulateArrowKey(Key.Up);
+                        break;
                     case "Down":
+                        Logger.Debug("Down (D-pad down) pressed in quit dialog - simulating Down arrow key");
+                        handled = SimulateArrowKey(Key.Down);
+                        break;
                     case "Left":
+                        Logger.Debug("Left (D-pad left) pressed in quit dialog - simulating Left arrow key");
+                        handled = SimulateArrowKey(Key.Left);
+                        break;
                     case "Right":
+                        Logger.Debug("Right (D-pad right) pressed in quit dialog - simulating Right arrow key");
+                        handled = SimulateArrowKey(Key.Right);
+                        break;
                     case "LeftButton":
+                        Logger.Debug("LeftButton (LB) pressed in quit dialog - simulating Shift+Tab navigation");
+                        handled = SimulateTabNavigation(shift: true);
+                        break;
                     case "RightButton":
-                        QuitDialogNavigation?.Invoke(input);
+                        Logger.Debug("RightButton (RB) pressed in quit dialog - simulating Tab navigation");
+                        handled = SimulateTabNavigation(shift: false);
                         break;
                     case "Confirm":
-                        QuitDialogNavigation?.Invoke("Confirm");
+                        Logger.Debug("Confirm (A button) pressed in quit dialog - simulating Enter key");
+                        handled = SimulateEnterKey();
                         break;
                     case "Cancel":
                         CancelQuitCommand.Execute(Unit.Default);
